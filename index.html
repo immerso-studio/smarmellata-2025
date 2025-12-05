@@ -99,22 +99,11 @@
 
         h1 {
             font-size: clamp(3.5rem, 12vw, 11rem);
-            margin-bottom: 0.75rem;
+            margin-bottom: 2rem;
             color: var(--text-primary);
             line-height: 0.9;
             opacity: 0;
             animation: fadeInUp 1s ease 0.3s forwards;
-        }
-
-        .subtitle {
-            font-size: clamp(0.875rem, 1.5vw, 1.125rem);
-            color: var(--text-tertiary);
-            margin-bottom: 2rem;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            font-weight: 400;
-            opacity: 0;
-            animation: fadeInUp 1s ease 0.5s forwards;
         }
 
         .description {
@@ -255,7 +244,7 @@
             position: relative;
             max-width: 900px;
             margin: 0 auto 3rem;
-            min-height: 280px;
+            min-height: 300px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -263,7 +252,7 @@
 
         @media (max-width: 768px) {
             .slot-machine-container {
-                min-height: 200px;
+                min-height: 220px;
                 margin-bottom: 2rem;
             }
         }
@@ -279,32 +268,52 @@
         @media (max-width: 640px) {
             .slot-machine {
                 gap: 0.5rem;
-                flex-direction: column;
-                align-items: center;
             }
         }
 
         .slot-column {
             position: relative;
-            width: 180px;
-            height: 220px;
+            width: 200px;
+            height: 250px;
             overflow: hidden;
             border: 1px solid var(--border-color);
             background: var(--secondary-bg);
+            border-radius: 4px;
         }
 
         @media (max-width: 768px) {
             .slot-column {
-                width: 140px;
-                height: 180px;
+                width: 160px;
+                height: 200px;
             }
         }
 
         @media (max-width: 640px) {
             .slot-column {
-                width: 200px;
-                height: 80px;
+                width: 100px;
+                height: 150px;
             }
+        }
+
+        .slot-window {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            transform: translateY(-50%);
+            background: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(255, 255, 255, 0.05) 20%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.05) 80%,
+                transparent 100%
+            );
+            pointer-events: none;
+            z-index: 2;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .slot-items {
@@ -314,45 +323,43 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            transition: transform 2s cubic-bezier(0.2, 0.8, 0.3, 1);
+            transition-timing-function: cubic-bezier(0.1, 0.8, 0.2, 1);
         }
 
         .slot-item {
-            height: 220px;
+            height: 250px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 2rem 1rem;
             text-align: center;
-            border-bottom: 1px solid var(--border-color);
         }
 
         @media (max-width: 768px) {
             .slot-item {
-                height: 180px;
+                height: 200px;
                 padding: 1.5rem 1rem;
             }
         }
 
         @media (max-width: 640px) {
             .slot-item {
-                height: 80px;
-                flex-direction: row;
-                gap: 1rem;
+                height: 150px;
                 padding: 1rem;
             }
         }
 
         .slot-emoji {
-            font-size: 3.5rem;
+            font-size: 4rem;
             margin-bottom: 1rem;
             opacity: 0.9;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         @media (max-width: 768px) {
             .slot-emoji {
-                font-size: 2.5rem;
+                font-size: 3rem;
                 margin-bottom: 0.75rem;
             }
         }
@@ -360,7 +367,7 @@
         @media (max-width: 640px) {
             .slot-emoji {
                 font-size: 2rem;
-                margin-bottom: 0;
+                margin-bottom: 0.5rem;
             }
         }
 
@@ -387,32 +394,13 @@
             color: var(--text-secondary);
             text-align: center;
             font-weight: 300;
-            z-index: 1;
+            z-index: 3;
             pointer-events: none;
+            transition: opacity 0.3s ease;
         }
 
         .slot-machine.active .slot-machine-text {
             opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .slot-machine-line {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                var(--accent-color) 20%, 
-                var(--accent-color) 80%, 
-                transparent 100%);
-            transform: translateY(-50%);
-            opacity: 0;
-        }
-
-        .slot-machine.active .slot-machine-line {
-            opacity: 0.3;
         }
 
         .generate-btn {
@@ -444,19 +432,6 @@
             pointer-events: none;
         }
 
-        .generate-btn::after {
-            content: 'SPIN';
-            font-size: 0.6875rem;
-            position: absolute;
-            top: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary-bg);
-            padding: 0 0.5rem;
-            color: var(--text-tertiary);
-            font-weight: 300;
-        }
-
         .combo-name {
             text-align: center;
             margin-top: 2rem;
@@ -482,6 +457,167 @@
         .combo-name.visible {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        /* Process Section */
+        .process-section {
+            background: var(--primary-bg);
+            min-height: 100vh;
+            padding: 4rem 1.5rem;
+        }
+
+        .process-title {
+            font-size: clamp(2.5rem, 8vw, 7rem);
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .process-subtitle {
+            text-align: center;
+            color: var(--text-tertiary);
+            font-size: 0.8125rem;
+            margin-bottom: 4rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .process-item {
+            position: relative;
+            aspect-ratio: 1;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .process-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .process-item:hover::before {
+            opacity: 1;
+        }
+
+        .process-placeholder {
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* Interactive Oranges Section */
+        .oranges-section {
+            background: rgba(5, 5, 5, 0.9);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .oranges-title {
+            font-size: clamp(2.5rem, 8vw, 7rem);
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .oranges-subtitle {
+            text-align: center;
+            color: var(--text-tertiary);
+            font-size: 0.8125rem;
+            margin-bottom: 3rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+
+        .oranges-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 500px;
+            position: relative;
+            border: 1px solid var(--border-color);
+            background: var(--secondary-bg);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .orange {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ff9800, #e65100);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 
+                inset -10px -10px 20px rgba(0, 0, 0, 0.3),
+                inset 5px 5px 15px rgba(255, 255, 255, 0.1),
+                0 10px 30px rgba(230, 81, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            user-select: none;
+        }
+
+        .orange:hover {
+            transform: scale(1.1);
+            box-shadow: 
+                inset -10px -10px 20px rgba(0, 0, 0, 0.4),
+                inset 5px 5px 15px rgba(255, 255, 255, 0.2),
+                0 15px 40px rgba(230, 81, 0, 0.3);
+        }
+
+        .orange::before {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            top: 10px;
+            left: 15px;
+            filter: blur(1px);
+        }
+
+        .orange::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            top: 20px;
+            left: 25px;
+            filter: blur(1px);
         }
 
         footer {
@@ -520,7 +656,9 @@
         }
 
         /* Loading animations */
-        .generator-title, .generator-subtitle, .slot-machine-container, .generate-btn {
+        .generator-title, .generator-subtitle, .slot-machine-container, .generate-btn,
+        .process-title, .process-subtitle, .process-grid,
+        .oranges-title, .oranges-subtitle, .oranges-container {
             opacity: 0;
             animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
@@ -528,6 +666,10 @@
         .generator-subtitle { animation-delay: 0.1s; }
         .slot-machine-container { animation-delay: 0.2s; }
         .generate-btn { animation-delay: 0.3s; }
+        .process-subtitle { animation-delay: 0.1s; }
+        .process-grid { animation-delay: 0.2s; }
+        .oranges-subtitle { animation-delay: 0.1s; }
+        .oranges-container { animation-delay: 0.2s; }
 
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -570,7 +712,6 @@
         <div class="content-wrapper">
             <div class="hero-content">
                 <h1>SMARMELLATA</h1>
-                <p class="subtitle">Tradizione Digitale</p>
                 <p class="description">
                     Quando il design incontra la dolcezza. 
                     Il regalo di Natale che unisce creatività e gusto dal 20XX.
@@ -592,15 +733,17 @@
 
             <div class="slot-machine-container">
                 <div class="slot-machine-text">Clicca "Genera Combo" per iniziare</div>
-                <div class="slot-machine-line"></div>
                 <div class="slot-machine" id="slotMachine">
-                    <div class="slot-column" id="slot1">
+                    <div class="slot-column">
+                        <div class="slot-window"></div>
                         <div class="slot-items" id="slotItems1"></div>
                     </div>
-                    <div class="slot-column" id="slot2">
+                    <div class="slot-column">
+                        <div class="slot-window"></div>
                         <div class="slot-items" id="slotItems2"></div>
                     </div>
-                    <div class="slot-column" id="slot3">
+                    <div class="slot-column">
+                        <div class="slot-window"></div>
                         <div class="slot-items" id="slotItems3"></div>
                     </div>
                 </div>
@@ -609,6 +752,45 @@
             <div class="combo-name" id="comboName"></div>
 
             <button class="generate-btn" id="generateBtn" onclick="startSlotMachine()">Genera Combo</button>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="section process-section" id="process">
+        <div class="content-wrapper">
+            <h2 class="process-title">IL PROCESSO</h2>
+            <p class="process-subtitle">Dall'idea alla realizzazione</p>
+            
+            <div class="process-grid">
+                <div class="process-item">
+                    <span class="process-placeholder">Packaging Design</span>
+                </div>
+                <div class="process-item">
+                    <span class="process-placeholder">Produzione</span>
+                </div>
+                <div class="process-item">
+                    <span class="process-placeholder">Qualità</span>
+                </div>
+                <div class="process-item">
+                    <span class="process-placeholder">Confezionamento</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Oranges Section -->
+    <section class="section oranges-section" id="oranges">
+        <div class="content-wrapper">
+            <h2 class="oranges-title">ARANCE INTERATTIVE</h2>
+            <p class="oranges-subtitle">Guarda come si muovono</p>
+            
+            <div class="oranges-container" id="orangesContainer">
+                <!-- Oranges will be generated here -->
+            </div>
+            
+            <div class="description" style="text-align: center; max-width: 600px; margin-top: 2rem;">
+                Muovi il mouse per interagire con le arance. Si muovono in modo naturale evitando il cursore.
+            </div>
         </div>
     </section>
 
@@ -666,13 +848,12 @@
         }
 
         function initializeSlotMachine() {
-            // Create 20 items per slot for smooth spinning
             for (let i = 0; i < 3; i++) {
                 const slotItems = document.getElementById(`slotItems${i + 1}`);
                 slotItems.innerHTML = '';
                 
-                // Add 20 copies of all combos for spinning effect
-                for (let j = 0; j < 20; j++) {
+                // Create more items for smoother spinning
+                for (let j = 0; j < 25; j++) {
                     combos.forEach(combo => {
                         const item = document.createElement('div');
                         item.className = 'slot-item';
@@ -705,14 +886,35 @@
             const selected = [shuffled[0], shuffled[1]];
             currentCombo = selected;
 
-            // Spin each slot
-            const spinPromises = [];
-            
+            // Calculate positions
+            const positions = [];
             for (let i = 0; i < 3; i++) {
-                spinPromises.push(spinSlot(i, selected[i % 2]));
+                const comboIndex = i % 2;
+                const targetCombo = selected[comboIndex];
+                
+                // Find this combo in the items
+                const slotItems = document.getElementById(`slotItems${i + 1}`);
+                const items = slotItems.querySelectorAll('.slot-item');
+                
+                let targetPosition = -1;
+                items.forEach((item, index) => {
+                    if (item.querySelector('.slot-emoji').textContent === targetCombo.icon) {
+                        targetPosition = index;
+                    }
+                });
+                
+                positions.push({
+                    slotIndex: i,
+                    targetPosition: targetPosition,
+                    itemHeight: getItemHeight()
+                });
             }
 
-            // When all slots are done
+            // Start spinning with different timings for each slot
+            const spinPromises = positions.map((pos, index) => 
+                spinSlot(pos.slotIndex, pos.targetPosition, pos.itemHeight, index * 100)
+            );
+
             Promise.all(spinPromises).then(() => {
                 setTimeout(() => {
                     // Show combo name
@@ -723,52 +925,198 @@
                     generateBtn.disabled = false;
                     generateBtn.textContent = 'Genera Combo';
                     isSpinning = false;
-                }, 500);
+                }, 1000);
             });
         }
 
-        function spinSlot(slotIndex, targetCombo) {
+        function getItemHeight() {
+            if (window.innerWidth <= 640) return 150;
+            if (window.innerWidth <= 768) return 200;
+            return 250;
+        }
+
+        function spinSlot(slotIndex, targetPosition, itemHeight, delay) {
             return new Promise((resolve) => {
-                const slotItems = document.getElementById(`slotItems${slotIndex + 1}`);
-                const items = slotItems.querySelectorAll('.slot-item');
-                
-                // Find target position
-                let targetIndex = -1;
-                items.forEach((item, index) => {
-                    if (item.querySelector('.slot-emoji').textContent === targetCombo.icon) {
-                        targetIndex = index;
-                    }
-                });
-
-                // Calculate final position (target position + some extra spins)
-                const itemHeight = slotIndex === 2 && window.innerWidth <= 640 ? 80 : 
-                                 slotIndex === 2 && window.innerWidth <= 768 ? 180 : 220;
-                const extraSpins = 5; // Number of extra full rotations
-                const totalItems = items.length;
-                const targetPosition = -(targetIndex * itemHeight);
-                const extraDistance = -(extraSpins * totalItems * itemHeight);
-                const finalPosition = extraDistance + targetPosition;
-
-                // Reset to top before spinning
-                slotItems.style.transition = 'none';
-                slotItems.style.transform = 'translateY(0)';
-                
-                // Force reflow
-                slotItems.offsetHeight;
-
-                // Start spinning
-                slotItems.style.transition = 'transform 2s cubic-bezier(0.2, 0.8, 0.3, 1)';
-                slotItems.style.transform = `translateY(${finalPosition}px)`;
-
-                // Resolve when animation is complete
                 setTimeout(() => {
-                    // Snap to target position for perfect alignment
-                    slotItems.style.transition = 'none';
-                    slotItems.style.transform = `translateY(${targetPosition}px)`;
-                    resolve();
-                }, 2000);
+                    const slotItems = document.getElementById(`slotItems${slotIndex + 1}`);
+                    const items = slotItems.querySelectorAll('.slot-item');
+                    const totalItems = items.length;
+                    
+                    // Calculate final position (target + extra spins)
+                    const extraSpins = 5 + Math.random() * 2; // Random extra spins for realism
+                    const extraDistance = -(extraSpins * totalItems * itemHeight);
+                    const finalTargetPosition = -(targetPosition * itemHeight);
+                    const finalPosition = extraDistance + finalTargetPosition;
+
+                    // Start with fast spin, then slow down
+                    slotItems.style.transition = 'transform 3s cubic-bezier(0.1, 0.8, 0.2, 1)';
+                    slotItems.style.transform = `translateY(${finalPosition}px)`;
+
+                    // Add slight bounce effect at the end
+                    setTimeout(() => {
+                        slotItems.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                        slotItems.style.transform = `translateY(${finalTargetPosition - 10}px)`;
+                        
+                        setTimeout(() => {
+                            slotItems.style.transition = 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                            slotItems.style.transform = `translateY(${finalTargetPosition}px)`;
+                            resolve();
+                        }, 300);
+                    }, 3000);
+                }, delay);
             });
         }
+
+        // Interactive Oranges System
+        class Orange {
+            constructor(container) {
+                this.container = container;
+                this.element = document.createElement('div');
+                this.element.className = 'orange';
+                this.element.textContent = '🍊';
+                
+                this.radius = 30;
+                this.x = Math.random() * (container.offsetWidth - this.radius * 2) + this.radius;
+                this.y = Math.random() * (container.offsetHeight - this.radius * 2) + this.radius;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.speed = 1 + Math.random() * 1.5;
+                this.fleeDistance = 100;
+                this.fleeSpeed = 3;
+                this.isFleeing = false;
+                this.fleeDirection = { x: 0, y: 0 };
+                
+                this.updatePosition();
+                container.appendChild(this.element);
+                
+                // Add mouse event listeners to the container
+                this.mouseX = 0;
+                this.mouseY = 0;
+                this.isMouseInContainer = false;
+                
+                container.addEventListener('mousemove', (e) => {
+                    const rect = container.getBoundingClientRect();
+                    this.mouseX = e.clientX - rect.left;
+                    this.mouseY = e.clientY - rect.top;
+                    this.isMouseInContainer = true;
+                });
+                
+                container.addEventListener('mouseleave', () => {
+                    this.isMouseInContainer = false;
+                });
+            }
+            
+            updatePosition() {
+                this.element.style.left = `${this.x - this.radius}px`;
+                this.element.style.top = `${this.y - this.radius}px`;
+            }
+            
+            distanceToMouse() {
+                if (!this.isMouseInContainer) return Infinity;
+                const dx = this.mouseX - this.x;
+                const dy = this.mouseY - this.y;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+            
+            update() {
+                const distToMouse = this.distanceToMouse();
+                
+                if (distToMouse < this.fleeDistance) {
+                    // Flee from mouse
+                    this.isFleeing = true;
+                    const dx = this.mouseX - this.x;
+                    const dy = this.mouseY - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    
+                    // Normalize and invert direction
+                    this.vx = (-dx / dist) * this.fleeSpeed;
+                    this.vy = (-dy / dist) * this.fleeSpeed;
+                } else {
+                    // Normal wandering
+                    this.isFleeing = false;
+                    
+                    // Add some randomness to movement
+                    if (Math.random() < 0.05) {
+                        this.vx += (Math.random() - 0.5) * 0.5;
+                        this.vy += (Math.random() - 0.5) * 0.5;
+                    }
+                    
+                    // Limit speed
+                    const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                    if (currentSpeed > this.speed) {
+                        this.vx = (this.vx / currentSpeed) * this.speed;
+                        this.vy = (this.vy / currentSpeed) * this.speed;
+                    }
+                }
+                
+                // Update position
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Bounce off walls
+                if (this.x < this.radius) {
+                    this.x = this.radius;
+                    this.vx = Math.abs(this.vx);
+                }
+                if (this.x > this.container.offsetWidth - this.radius) {
+                    this.x = this.container.offsetWidth - this.radius;
+                    this.vx = -Math.abs(this.vx);
+                }
+                if (this.y < this.radius) {
+                    this.y = this.radius;
+                    this.vy = Math.abs(this.vy);
+                }
+                if (this.y > this.container.offsetHeight - this.radius) {
+                    this.y = this.container.offsetHeight - this.radius;
+                    this.vy = -Math.abs(this.vy);
+                }
+                
+                // Apply slight friction
+                if (!this.isFleeing) {
+                    this.vx *= 0.99;
+                    this.vy *= 0.99;
+                }
+                
+                this.updatePosition();
+            }
+        }
+
+        // Initialize oranges
+        let oranges = [];
+        let animationId;
+
+        function initOranges() {
+            const container = document.getElementById('orangesContainer');
+            oranges = [];
+            
+            // Create 15 oranges
+            for (let i = 0; i < 15; i++) {
+                oranges.push(new Orange(container));
+            }
+            
+            // Start animation loop
+            function animateOranges() {
+                oranges.forEach(orange => orange.update());
+                animationId = requestAnimationFrame(animateOranges);
+            }
+            
+            animateOranges();
+        }
+
+        // Clean up animation on page hide
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                cancelAnimationFrame(animationId);
+            } else {
+                if (oranges.length > 0) {
+                    function animateOranges() {
+                        oranges.forEach(orange => orange.update());
+                        animationId = requestAnimationFrame(animateOranges);
+                    }
+                    animateOranges();
+                }
+            }
+        });
 
         // Three.js Scene Setup
         const canvas = document.getElementById('canvas');
@@ -786,11 +1134,11 @@
         renderer.outputEncoding = THREE.sRGBEncoding;
 
         // Subtle lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 10);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
         scene.add(ambientLight);
         
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 10);
-        directionalLight.position.set(3, 3, 3);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.position.set(5, 5, 5);
         scene.add(directionalLight);
 
         // Load GLB Model
@@ -829,14 +1177,6 @@
             },
             function(error) {
                 console.error('Error loading GLB:', error);
-                // Fallback to a simple geometry if model fails to load
-                const geometry = new THREE.BoxGeometry(1, 1, 1);
-                const material = new THREE.MeshBasicMaterial({ 
-                    color: 0x333333,
-                    wireframe: true 
-                });
-                model = new THREE.Mesh(geometry, material);
-                scene.add(model);
             }
         );
 
@@ -883,25 +1223,6 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            
-            // Reinitialize slot machine if needed
-            if (window.innerWidth <= 640) {
-                document.querySelectorAll('.slot-column').forEach(col => {
-                    col.style.height = '80px';
-                });
-                document.querySelectorAll('.slot-item').forEach(item => {
-                    item.style.height = '80px';
-                    item.style.flexDirection = 'row';
-                });
-            } else {
-                document.querySelectorAll('.slot-column').forEach(col => {
-                    col.style.height = '220px';
-                });
-                document.querySelectorAll('.slot-item').forEach(item => {
-                    item.style.height = '220px';
-                    item.style.flexDirection = 'column';
-                });
-            }
         }
 
         window.addEventListener('resize', handleResize);
@@ -918,6 +1239,9 @@
 
             // Initialize slot machine
             initializeSlotMachine();
+            
+            // Initialize oranges
+            initOranges();
             
             // Start animation loop
             animate();
