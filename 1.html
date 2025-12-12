@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMARMELLATA 2025 - Regalo Natalizio</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js e GLTFLoader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <style>
+        @font-face {
+            font-family: 'AnalogueOS';
+            src: url('assets/AnalogueOS-Regular.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+            height: 100%;
+            font-family: 'Inter Tight', sans-serif;
+            font-weight: 400;
+        }
+        
+        /* Container principale */
+        .main-container {
+            position: relative;
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+        
+        /* Sezioni a tutto schermo */
+        .fullscreen-section {
+            height: 100vh;
+            width: 100%;
+            scroll-snap-align: start;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        /* Contenuto delle sezioni */
+        .section-content {
+            max-width: 1200px;
+            width: 90%;
+            padding: 40px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Prima sezione speciale */
+        #section1 {
+            background: linear-gradient(135deg, rgba(165, 165, 165, 0) 0%, rgba(161, 161, 161, 0) 100%), url('assets/IMG/SFONDO/sfondo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        /* Overlay per migliorare la leggibilità del testo */
+        #section1::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+        
+        /* Titolo principale nella prima sezione */
+        .hero-title {
+            font-family: 'AnalogueOS', sans-serif;
+            text-align: center;
+            line-height: 1;
+            margin-bottom: 20px;
+            z-index: 10;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s 0.5s forwards;
+            width: 100%;
+        }
+        
+        .main-title {
+            font-family: 'AnalogueOS', sans-serif;
+            display: block;
+            font-size: 8.5rem;
+            margin-top: -60px; /* Sposta il titolo più in alto */
+        }
+        
+        /* Sottotitolo centrato */
+        .hero-subtitle {
+            font-family: 'AnalogueOS', sans-serif;
+            font-size: 2.8rem;
+            color: #fbbf24;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 800px;
+            opacity: 0;
+            animation: fadeInUp 1s 1s forwards;
+            margin: 0 auto;
+        }
+        
+        /* Container per il modello 3D */
+        #model-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.7; /* Riduci opacità per far vedere lo sfondo */
+        }
+        
+        /* Anno/badge */
+        .year-badge {
+            display: inline-block;
+            background-color: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-family: 'Inter Tight', sans-serif;
+            font-weight: 600;
+            font-size: 1.4rem;
+            margin-top: 30px;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            position: relative;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Colori di sfondo per le altre sezioni */
+        #section2 {
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+        }
+        
+        #section3 {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+        }
+        
+        #section4 {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+        }
+        
+        /* Pattern di sfondo */
+        .section-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 40%);
+            z-index: 1;
+        }
+        
+        /* Titoli delle altre sezioni */
+        .section-title {
+            font-family: 'AnalogueOS', sans-serif;
+            font-size: 4.5rem;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s 0.3s forwards;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+        
+        /* Testi delle sezioni */
+        .section-text {
+            font-family: 'Inter Tight', sans-serif;
+            font-size: 1.3rem;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            max-width: 800px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s 0.5s forwards;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Lista delle caratteristiche */
+        .features-list {
+            list-style: none;
+            margin-top: 40px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s 0.7s forwards;
+            font-family: 'Inter Tight', sans-serif;
+        }
+        
+        .features-list li {
+            padding: 15px 0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Inter Tight', sans-serif;
+        }
+        
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .features-list li i {
+            color: #fbbf24;
+            font-size: 1.3rem;
+            min-width: 25px;
+        }
+        
+        /* Animazioni */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Indicatore di navigazione */
+        .nav-indicator {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .nav-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+            position: relative;
+        }
+        
+        .nav-dot.active {
+            background-color: #fbbf24;
+            transform: scale(1.4);
+            box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.2);
+        }
+        
+        .nav-dot:hover {
+            transform: scale(1.3);
+            background-color: rgba(251, 191, 36, 0.7);
+        }
+        
+        /* Etichetta per i dot di navigazione */
+        .nav-label {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            font-weight: 500;
+            font-family: 'Inter Tight', sans-serif;
+        }
+        
+        .nav-dot:hover .nav-label {
+            opacity: 1;
+        }
+        
+        /* Numerazione delle sezioni */
+        .section-number {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            z-index: 3;
+            opacity: 0;
+            animation: fadeIn 1s 0.2s forwards;
+            font-family: 'Inter Tight', sans-serif;
+        }
+        
+        /* Freccia di scorrimento */
+        .scroll-arrow {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(251, 191, 36, 0.8);
+            font-size: 2rem;
+            z-index: 10;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+            animation: bounce 2s infinite;
+        }
+        
+        .scroll-arrow:hover {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.1);
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+        
+        /* Progress bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+        
+        .scroll-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #1a1a2e, #0f3460, #fbbf24, #16213e);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Contenitore per il titolo e badge */
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 60px; /* Sposta tutto il contenuto più in alto */
+        }
+        
+        /* Loading per il modello 3D */
+        .model-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fbbf24;
+            font-size: 1.2rem;
+            z-index: 2;
+            font-family: 'Inter Tight', sans-serif;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-title {
+                font-size: 7rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 2.5rem;
+            }
+            
+            .section-title {
+                font-size: 4rem;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .main-title {
+                font-size: 5.5rem;
+                margin-top: -40px;
+            }
+            
+            .hero-subtitle {
+                font-size: 2rem;
+            }
+            
+            .section-title {
+                font-size: 3.5rem;
+            }
+            
+            .section-text {
+                font-size: 1.2rem;
+            }
+            
+            .nav-indicator {
+                right: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 4rem;
+                margin-top: -30px;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.7rem;
+                width: 95%;
+            }
+            
+            .section-title {
+                font-size: 2.8rem;
+            }
+            
+            .section-text {
+                font-size: 1.1rem;
+                line-height: 1.6;
+                margin-bottom: 30px;
+            }
+            
+            .section-content {
+                padding: 30px 20px;
+            }
+            
+            .section-number {
+                top: 25px;
+                left: 25px;
+                font-size: 1rem;
+            }
+            
+            .nav-indicator {
+                right: 15px;
+                gap: 20px;
+            }
+            
+            .nav-dot {
+                width: 14px;
+                height: 14px;
+            }
+            
+            .features-list li {
+                font-size: 1.1rem;
+                padding: 12px 0;
+            }
+            
+            .scroll-arrow {
+                bottom: 30px;
+                font-size: 1.8rem;
+            }
+            
+            .year-badge {
+                font-size: 1.1rem;
+                padding: 10px 25px;
+            }
+            
+            .hero-content {
+                padding-top: 40px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-title {
+                font-size: 3.2rem;
+                margin-top: -20px;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.5rem;
+            }
+            
+            .section-title {
+                font-size: 2.2rem;
+            }
+            
+            .section-text {
+                font-size: 1rem;
+            }
+            
+            .section-number {
+                top: 20px;
+                left: 20px;
+            }
+            
+            .features-list li {
+                font-size: 1rem;
+            }
+            
+            .nav-label {
+                display: none;
+            }
+            
+            #section1 {
+                padding: 20px;
+            }
+            
+            .year-badge {
+                font-size: 1rem;
+                padding: 8px 20px;
+                margin-top: 20px;
+            }
+            
+            .hero-content {
+                padding-top: 30px;
+            }
+        }
+        
+        /* Smooth scroll behavior per tutti i browser */
+        @media (prefers-reduced-motion: reduce) {
+            html, .main-container {
+                scroll-behavior: auto;
+            }
+            
+            .hero-title, .hero-subtitle, .section-title, .section-text, .features-list {
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+        
+        /* Fallback font per Analogue */
+        @supports not (font-variation-settings: normal) {
+            .hero-title, .hero-subtitle, .section-title {
+                font-family: 'AnalogueOS', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress bar -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar" id="scrollProgress"></div>
+    </div>
+    
+    <!-- Container principale -->
+    <div class="main-container" id="mainContainer">
+        <!-- Sezione 1 - SMARMELLATA 2025 -->
+        <section id="section1" class="fullscreen-section">
+            <div class="section-bg"></div>
+            
+            <!-- Container per il modello 3D -->
+            <div id="model-container"></div>
+            
+            <div class="section-number">01</div>
+            
+            <!-- Contenuto hero -->
+            <div class="hero-content">
+                <!-- Titolo principale -->
+                <div class="hero-title">
+                    <span class="main-title">SMARMELLATA</span>
+                    <div class="hero-subtitle">
+                        il regalo natalizio meno corporate di sempre
+                    </div>
+                    <div class="year-badge">EDIZIONE 2025</div>
+                </div>
+            </div>
+            
+            <div class="scroll-arrow" onclick="scrollToSection(2)">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </section>
+        
+        <!-- Sezione 2 - La Selezione -->
+        <section id="section2" class="fullscreen-section">
+            <div class="section-bg"></div>
+            <div class="section-number">02</div>
+            <div class="section-content">
+                <h1 class="section-title">La Selezione</h1>
+                <p class="section-text">
+                    Ogni vasetto di SMARMELLATA 2025 racconta una storia di territori incontaminati, frutti maturati al sole e sapienza artigiana. Una selezione che celebra la biodiversità italiana attraverso gusti unici e ricette segrete.
+                </p>
+                <p class="section-text">
+                    Dalle albicocche del Vesuvio ai mirtilli selvatici delle Alpi, ogni confettura è un viaggio sensoriale attraverso le regioni d'Italia, trasformando il semplice gesto di spalmare una fetta di pane in un'esperienza memorabile.
+                </p>
+                <ul class="features-list">
+                    <li><i class="fas fa-apple-alt"></i> Albicocche del Vesuvio DOP</li>
+                    <li><i class="fas fa-berry"></i> Mirtilli selvatici delle Alpi</li>
+                    <li><i class="fas fa-lemon"></i> Cedro di Diamante con zenzero</li>
+                    <li><i class="fas fa-seedling"></i> Fichi di Cosenza al brandy</li>
+                    <li><i class="fas fa-pepper-hot"></i> Confettura piccante di peperoni</li>
+                </ul>
+            </div>
+            <div class="scroll-arrow" onclick="scrollToSection(3)">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </section>
+        
+        <!-- Sezione 3 - Perché Sceglierci -->
+        <section id="section3" class="fullscreen-section">
+            <div class="section-bg"></div>
+            <div class="section-number">03</div>
+            <div class="section-content">
+                <h1 class="section-title">Perché Sceglierci</h1>
+                <p class="section-text">
+                    In un mondo di regali aziendali standardizzati e impersonali, SMARMELLATA 2025 rappresenta una scelta coraggiosa e autentica. Non è solo un prodotto, ma un'esperienza condivisa che crea connessioni genuine.
+                </p>
+                <p class="section-text">
+                    Ogni confezione è pensata per suscitare emozioni e ricordare che dietro ogni rapporto professionale ci sono persone reali, con passioni e gusti che vanno oltre gli schemi corporate.
+                </p>
+                <ul class="features-list">
+                    <li><i class="fas fa-award"></i> Qualità certificata e tracciabile</li>
+                    <li><i class="fas fa-truck"></i> Consegna gratuita in tutta Italia</li>
+                    <li><i class="fas fa-tag"></i> Personalizzazione con nome azienda</li>
+                    <li><i class="fas fa-gift"></i> Confezione regalo premium inclusa</li>
+                    <li><i class="fas fa-hand-holding-heart"></i> Supporto a piccoli produttori locali</li>
+                </ul>
+            </div>
+            <div class="scroll-arrow" onclick="scrollToSection(4)">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </section>
+        
+        <!-- Sezione 4 - Ordina Ora -->
+        <section id="section4" class="fullscreen-section">
+            <div class="section-bg"></div>
+            <div class="section-number">04</div>
+            <div class="section-content">
+                <h1 class="section-title">Ordina Ora</h1>
+                <p class="section-text">
+                    Non perdere l'opportunità di distinguerti con un regalo che veramente verrà ricordato. SMARMELLATA 2025 è disponibile in edizione limitata, con consegne programmate per arrivare perfettamente in tempo per le festività natalizie.
+                </p>
+                <p class="section-text">
+                    Contattaci per personalizzare il tuo ordine, scegliere le combinazioni di gusti preferite e ricevere un preventivo su misura per la tua azienda o per i tuoi regali personali.
+                </p>
+                <ul class="features-list">
+                    <li><i class="fas fa-calendar-check"></i> Ordini entro il 15 dicembre</li>
+                    <li><i class="fas fa-box-open"></i> Consegna garantita entro Natale</li>
+                    <li><i class="fas fa-euro-sign"></i> A partire da 24,90€ a confezione</li>
+                    <li><i class="fas fa-phone-alt"></i> Assistenza dedicata 7/7</li>
+                    <li><i class="fas fa-file-invoice"></i> Fatturazione immediata</li>
+                </ul>
+            </div>
+            <div class="scroll-arrow" onclick="scrollToSection(1)">
+                <i class="fas fa-chevron-up"></i>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Indicatore di navigazione -->
+    <div class="nav-indicator">
+        <div class="nav-dot active" data-section="1">
+            <span class="nav-label">SMARMELLATA 2025</span>
+        </div>
+        <div class="nav-dot" data-section="2">
+            <span class="nav-label">La Selezione</span>
+        </div>
+        <div class="nav-dot" data-section="3">
+            <span class="nav-label">Perché Sceglierci</span>
+        </div>
+        <div class="nav-dot" data-section="4">
+            <span class="nav-label">Ordina Ora</span>
+        </div>
+    </div>
+    
+    <script>
+        // ==================== THREE.JS MODELLO 3D ====================
+        let scene, camera, renderer, model, mixer;
+        let isThreeJSInitialized = false;
+        
+        function initThreeJS() {
+            if (isThreeJSInitialized) return;
+            
+            // Ottieni il container
+            const container = document.getElementById('model-container');
+            
+            // Crea la scena
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x1a1a2e, 10, 30);
+            
+            // Crea la camera
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.z = 5;
+            camera.position.y = 1;
+            
+            // Crea il renderer
+            renderer = new THREE.WebGLRenderer({ 
+                alpha: true, 
+                antialias: true 
+            });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            container.appendChild(renderer.domElement);
+            
+            // Aggiungi luci
+            const ambientLight = new THREE.AmbientLight(0xfbbf24, 0.3);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            const pointLight = new THREE.PointLight(0xfbbf24, 0.5, 20);
+            pointLight.position.set(-3, 3, 3);
+            scene.add(pointLight);
+            
+            // Aggiungi luce per evidenziare il modello
+            const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
+            backLight.position.set(-5, -5, -5);
+            scene.add(backLight);
+            
+            // Loader per il modello GLB
+            const loader = new THREE.GLTFLoader();
+            
+            // Messaggio di loading
+            const loadingElement = document.createElement('div');
+            loadingElement.className = 'model-loading';
+            loadingElement.textContent = 'Caricamento modello...';
+            container.appendChild(loadingElement);
+            
+            // Carica il modello GLB
+            loader.load(
+                'assets/3.glb',
+                function(gltf) {
+                    model = gltf.scene;
+                    scene.add(model);
+                    
+                    // Configura il modello
+                    model.position.set(0, 0, 0);
+                    model.scale.set(8, 8, 8);
+                    
+                    // Attiva le ombre per tutti i mesh del modello
+                    model.traverse(function(child) {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            
+                            // Aggiungi un materiale più interessante se necessario
+                            if (child.material) {
+                                child.material.metalness = 0.1;
+                                child.material.roughness = 0.8;
+                            }
+                        }
+                    });
+                    
+                    // Animazioni se presenti nel modello
+                    if (gltf.animations && gltf.animations.length) {
+                        mixer = new THREE.AnimationMixer(model);
+                        gltf.animations.forEach((clip) => {
+                            mixer.clipAction(clip).play();
+                        });
+                    }
+                    
+                    // Rimuovi il messaggio di loading
+                    container.removeChild(loadingElement);
+                    
+                    console.log('Modello GLB caricato con successo');
+                },
+                function(xhr) {
+                    // Progresso del caricamento
+                    console.log((xhr.loaded / xhr.total * 100) + '% caricato');
+                    loadingElement.textContent = 'Caricamento: ' + Math.round(xhr.loaded / xhr.total * 100) + '%';
+                },
+                function(error) {
+                    console.error('Errore nel caricamento del modello:', error);
+                    loadingElement.textContent = 'Errore nel caricamento del modello';
+                    
+                    // Fallback: crea un cilindro semplice se il modello non si carica
+                    createFallbackModel();
+                    container.removeChild(loadingElement);
+                }
+            );
+            
+            isThreeJSInitialized = true;
+            
+            // Animazione
+            const clock = new THREE.Clock();
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Aggiorna le animazioni del modello se presente
+                if (mixer) {
+                    mixer.update(clock.getDelta());
+                }
+                
+                // Rotazione lenta del modello
+                if (model) {
+                    model.rotation.y += 0.005;
+                    
+                    // Effetto fluttuante
+                    model.position.y = Math.sin(Date.now() * 0.001) * 0.1;
+                }
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Gestione resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Parallasse con il mouse
+            document.addEventListener('mousemove', onMouseMove);
+        }
+        
+        // Fallback se il modello GLB non si carica
+        function createFallbackModel() {
+            // Crea una geometria cilindrica di fallback
+            const geometry = new THREE.CylinderGeometry(1.5, 1.5, 3, 32);
+            const material = new THREE.MeshStandardMaterial({
+                color: 0xfbbf24,
+                roughness: 0.3,
+                metalness: 0.2,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            model = new THREE.Mesh(geometry, material);
+            model.castShadow = true;
+            model.receiveShadow = true;
+            scene.add(model);
+            
+            // Aggiungi un coperchio
+            const topGeometry = new THREE.CylinderGeometry(1.6, 1.6, 0.2, 32);
+            const topMaterial = new THREE.MeshStandardMaterial({
+                color: 0x8b5a2b,
+                roughness: 0.5,
+                metalness: 0.7
+            });
+            const top = new THREE.Mesh(topGeometry, topMaterial);
+            top.position.y = 1.6;
+            top.castShadow = true;
+            scene.add(top);
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('model-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+        
+        function onMouseMove(event) {
+            if (!model) return;
+            
+            // Calcola la posizione del mouse normalizzata
+            const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            // Applica rotazione in base al movimento del mouse
+            model.rotation.x = Math.PI * 0.1 + mouseY * 0.1;
+            model.rotation.z = mouseX * 0.1;
+        }
+        
+        // ==================== NAVIGAZIONE E ANIMAZIONI ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.fullscreen-section');
+            const navDots = document.querySelectorAll('.nav-dot');
+            const mainContainer = document.getElementById('mainContainer');
+            const scrollProgress = document.getElementById('scrollProgress');
+            
+            // Inizializza Three.js quando la prima sezione diventa visibile
+            const observerFirstSection = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                        // Delay per caricare prima il resto della pagina
+                        setTimeout(initThreeJS, 500);
+                        observerFirstSection.disconnect(); // Osserva solo una volta
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observerFirstSection.observe(sections[0]);
+            
+            // Attiva le animazioni per la prima sezione
+            activateSectionAnimations(sections[0]);
+            
+            // Funzione per attivare le animazioni di una sezione
+            function activateSectionAnimations(section) {
+                const title = section.querySelector('.section-title');
+                const texts = section.querySelectorAll('.section-text');
+                const list = section.querySelector('.features-list');
+                const number = section.querySelector('.section-number');
+                const heroTitle = section.querySelector('.hero-title');
+                const heroSubtitle = section.querySelector('.hero-subtitle');
+                
+                // Reset e riattiva le animazioni
+                const elements = [title, ...texts, list, number, heroTitle, heroSubtitle].filter(el => el);
+                
+                elements.forEach(el => {
+                    el.style.animation = 'none';
+                    setTimeout(() => {
+                        if (el.classList.contains('hero-title')) {
+                            el.style.animation = 'fadeInUp 1s 0.5s forwards';
+                        } else if (el.classList.contains('hero-subtitle')) {
+                            el.style.animation = 'fadeInUp 1s 1s forwards';
+                        } else if (el.classList.contains('section-title')) {
+                            el.style.animation = 'fadeInUp 1s 0.3s forwards';
+                        } else if (el.classList.contains('section-text')) {
+                            el.style.animation = 'fadeInUp 1s 0.5s forwards';
+                        } else if (el.classList.contains('features-list')) {
+                            el.style.animation = 'fadeInUp 1s 0.7s forwards';
+                        } else if (el.classList.contains('section-number')) {
+                            el.style.animation = 'fadeIn 1s 0.2s forwards';
+                        }
+                    }, 10);
+                });
+            }
+            
+            // Intersection Observer per rilevare la sezione visibile
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                        const sectionId = entry.target.id;
+                        const sectionNumber = sectionId.replace('section', '');
+                        
+                        // Aggiorna i dot di navigazione
+                        navDots.forEach(dot => {
+                            dot.classList.remove('active');
+                            if (dot.getAttribute('data-section') === sectionNumber) {
+                                dot.classList.add('active');
+                            }
+                        });
+                        
+                        // Attiva le animazioni per la sezione visibile
+                        activateSectionAnimations(entry.target);
+                    }
+                });
+            }, {
+                threshold: [0.3, 0.5, 0.7],
+                rootMargin: '0px'
+            });
+            
+            // Osserva tutte le sezioni
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            // Navigazione tramite click sui dot
+            navDots.forEach(dot => {
+                dot.addEventListener('click', function() {
+                    const sectionNumber = this.getAttribute('data-section');
+                    const targetSection = document.getElementById(`section${sectionNumber}`);
+                    
+                    if (targetSection) {
+                        // Scroll smooth verso la sezione target
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Aggiorna la progress bar durante lo scroll
+            function updateScrollProgress() {
+                const windowHeight = mainContainer.scrollHeight - mainContainer.clientHeight;
+                const scrolled = mainContainer.scrollTop;
+                const progress = (scrolled / windowHeight) * 100;
+                scrollProgress.style.width = `${progress}%`;
+            }
+            
+            // Aggiorna la progress bar
+            mainContainer.addEventListener('scroll', updateScrollProgress);
+            
+            // Inizializza la progress bar
+            updateScrollProgress();
+            
+            // Gestione della navigazione con tastiera
+            document.addEventListener('keydown', function(event) {
+                const activeDot = document.querySelector('.nav-dot.active');
+                if (!activeDot) return;
+                
+                const currentSection = parseInt(activeDot.getAttribute('data-section'));
+                
+                if (event.key === 'ArrowDown' || event.key === 'PageDown') {
+                    event.preventDefault();
+                    const nextSection = Math.min(currentSection + 1, 4);
+                    scrollToSection(nextSection);
+                } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
+                    event.preventDefault();
+                    const prevSection = Math.max(currentSection - 1, 1);
+                    scrollToSection(prevSection);
+                } else if (event.key >= '1' && event.key <= '4') {
+                    event.preventDefault();
+                    scrollToSection(parseInt(event.key));
+                }
+            });
+            
+            // Gestione dello swipe su dispositivi touch
+            let touchStartY = 0;
+            let touchEndY = 0;
+            
+            mainContainer.addEventListener('touchstart', function(event) {
+                touchStartY = event.changedTouches[0].screenY;
+            }, { passive: true });
+            
+            mainContainer.addEventListener('touchend', function(event) {
+                touchEndY = event.changedTouches[0].screenY;
+                handleSwipe();
+            }, { passive: true });
+            
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                const swipeDistance = touchStartY - touchEndY;
+                
+                if (Math.abs(swipeDistance) < swipeThreshold) return;
+                
+                const activeDot = document.querySelector('.nav-dot.active');
+                if (!activeDot) return;
+                
+                const currentSection = parseInt(activeDot.getAttribute('data-section'));
+                
+                if (swipeDistance > 0) {
+                    // Swipe verso l'alto - prossima sezione
+                    const nextSection = Math.min(currentSection + 1, 4);
+                    scrollToSection(nextSection);
+                } else {
+                    // Swipe verso il basso - sezione precedente
+                    const prevSection = Math.max(currentSection - 1, 1);
+                    scrollToSection(prevSection);
+                }
+            }
+            
+            // Ottimizzazione per scroll smooth
+            let isScrolling = false;
+            
+            mainContainer.addEventListener('scroll', function() {
+                if (!isScrolling) {
+                    window.requestAnimationFrame(function() {
+                        updateScrollProgress();
+                        isScrolling = false;
+                    });
+                    isScrolling = true;
+                }
+            }, { passive: true });
+            
+            // Adatta il layout quando la finestra viene ridimensionata
+            window.addEventListener('resize', function() {
+                // Forza un aggiornamento dell'indicatore attivo
+                const activeSection = document.querySelector('.fullscreen-section:target') || sections[0];
+                const sectionId = activeSection.id;
+                const sectionNumber = sectionId.replace('section', '');
+                
+                navDots.forEach(dot => {
+                    dot.classList.remove('active');
+                    if (dot.getAttribute('data-section') === sectionNumber) {
+                        dot.classList.add('active');
+                    }
+                });
+                
+                // Ridimensiona Three.js se inizializzato
+                if (isThreeJSInitialized) {
+                    onWindowResize();
+                }
+            });
+        });
+        
+        // Funzione per lo scroll verso una sezione specifica
+        function scrollToSection(sectionNumber) {
+            const targetSection = document.getElementById(`section${sectionNumber}`);
+            if (targetSection) {
+                targetSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMARMELLATA - Immerso Studio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <style>
+        @font-face {
+            font-family: 'AnalogueOS';
+            src: url('assets/AnalogueOS-Regular.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'AnalogueOS', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
+            font-weight: 300;
+            letter-spacing: -0.01em;
+        }
+
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        .section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .hero-content {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        h1 {
+            font-size: clamp(4rem, 12vw, 12rem);
+            font-weight: 300;
+            margin-bottom: 1rem;
+            letter-spacing: -0.03em;
+            color: #fff;
+            line-height: 0.9;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.3s forwards;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: #888;
+            margin-bottom: 2rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.5s forwards;
+        }
+
+        .description {
+            font-size: clamp(1rem, 1.5vw, 1.125rem);
+            color: #aaa;
+            max-width: 500px;
+            margin: 0 auto 3rem;
+            line-height: 1.6;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.7s forwards;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0;
+            font-family: 'AnalogueOS';
+            font-weight: 300;
+            color: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.9s forwards;
+        }
+
+        .btn:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 1.5rem;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-right: 1px solid currentColor;
+            border-top: 1px solid currentColor;
+            transform: translateY(-50%) rotate(45deg);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn:hover::after {
+            transform: translateY(-50%) rotate(45deg) translateX(2px) translateY(-2px);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.5;
+            animation: fadeIn 1s ease 1.2s forwards;
+        }
+
+        .scroll-indicator span {
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            color: #888;
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 3rem;
+            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: scrollLine 2s ease-in-out infinite;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scrollLine {
+            0%, 100% {
+                height: 0;
+                opacity: 0;
+            }
+            50% {
+                height: 3rem;
+                opacity: 1;
+            }
+        }
+
+        .generator-section {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            min-height: 100vh;
+            padding: 4rem 2rem;
+        }
+
+        .generator-title {
+            font-size: clamp(3rem, 8vw, 8rem);
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .generator-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.875rem;
+            margin-bottom: 4rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .category-tab {
+            padding: 0.75rem 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            font-family: 'AnalogueOS';
+            font-weight: 300;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            backdrop-filter: blur(10px);
+        }
+
+        .category-tab:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .category-tab.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .cards-container {
+            position: relative;
+            height: 600px;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 1200px;
+            overflow: hidden;
+        }
+
+        .carousel-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            touch-action: pan-y;
+            -webkit-user-select: none;
+            user-select: none;
+            cursor: grab;
+        }
+
+        .carousel-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .card-track {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+
+        .recipe-card {
+            width: 320px;
+            height: 480px;
+            transform-origin: center;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+            will-change: transform, opacity;
+            /* Angoli tagliati a 45 gradi */
+            clip-path: polygon(
+                15px 0%, calc(100% - 15px) 0%, 100% 15px,
+                100% calc(100% - 15px), calc(100% - 15px) 100%,
+                15px 100%, 0% calc(100% - 15px), 0% 15px
+            );
+        }
+
+        .recipe-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .recipe-card.flipped .recipe-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            overflow: hidden;
+            /* Mantiene gli angoli tagliati anche all'interno */
+            clip-path: polygon(
+                15px 0%, calc(100% - 15px) 0%, 100% 15px,
+                100% calc(100% - 15px), calc(100% - 15px) 100%,
+                15px 100%, 0% calc(100% - 15px), 0% 15px
+            );
+        }
+
+        .card-front {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-back {
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: rotateY(180deg);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 60%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 30%, rgba(10, 10, 10, 0.8));
+        }
+
+        .card-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.7));
+        }
+
+        .card-content {
+            padding: 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            letter-spacing: -0.01em;
+        }
+
+        .card-category {
+            font-size: 0.875rem;
+            color: #888;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .card-flip-hint {
+            font-size: 0.75rem;
+            color: #666;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: auto;
+            text-align: center;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
+        .recipe-card.active .card-flip-hint {
+            opacity: 1;
+        }
+
+        .recipe-title {
+            font-size: 1.75rem;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            letter-spacing: -0.01em;
+        }
+
+        .recipe-ingredients, .recipe-instructions {
+            margin-bottom: 1.5rem;
+        }
+
+        .recipe-section-title {
+            font-size: 0.875rem;
+            color: #888;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .recipe-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #aaa;
+            font-weight: 300;
+        }
+
+        .recipe-time {
+            display: flex;
+            gap: 2rem;
+            margin-top: auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .time-item {
+            text-align: center;
+        }
+
+        .time-label {
+            font-size: 0.75rem;
+            color: #888;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .time-value {
+            font-size: 1rem;
+            color: #fff;
+        }
+
+        .nav-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 3rem;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-dot.active {
+            background: rgba(255, 255, 255, 0.8);
+            transform: scale(1.2);
+        }
+
+        footer {
+            padding: 3rem 2rem;
+            background: rgba(5, 5, 5, 0.8);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+
+        .footer-text {
+            color: #666;
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .footer-copyright {
+            color: #444;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        .fade-in-delay-1 { animation-delay: 0.1s; }
+        .fade-in-delay-2 { animation-delay: 0.2s; }
+        .fade-in-delay-3 { animation-delay: 0.3s; }
+        .fade-in-delay-4 { animation-delay: 0.4s; }
+
+        /* Card glow effect - SOLO per la scheda attiva */
+        .recipe-card.active {
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.15),
+                        0 25px 70px rgba(0, 0, 0, 0.5);
+            transform: scale(1.05);
+            opacity: 1 !important;
+            z-index: 10;
+        }
+
+        /* Schede non attive - disabilitate per il flip */
+        .recipe-card:not(.active) {
+            transform: scale(0.85);
+            opacity: 0.4;
+            cursor: default !important;
+            pointer-events: none; /* Disabilita tutti gli eventi */
+        }
+
+        /* Swipe hint */
+        .swipe-hint {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .swipe-hint::before,
+        .swipe-hint::after {
+            content: '↔';
+            font-size: 1rem;
+            animation: swipeHint 2s ease-in-out infinite;
+        }
+
+        @keyframes swipeHint {
+            0%, 100% { transform: translateX(0); opacity: 0.3; }
+            50% { transform: translateX(5px); opacity: 1; }
+        }
+
+        /* Media queries per dispositivi mobili */
+        @media (max-width: 768px) {
+            .cards-container {
+                height: 500px;
+            }
+            
+            .recipe-card {
+                width: 280px;
+                height: 420px;
+            }
+            
+            .card-track {
+                gap: 40px;
+            }
+            
+            .card-back {
+                padding: 1.5rem;
+            }
+            
+            .recipe-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cards-container {
+                height: 450px;
+            }
+            
+            .recipe-card {
+                width: 250px;
+                height: 380px;
+            }
+            
+            .card-track {
+                gap: 30px;
+            }
+            
+            .card-content {
+                padding: 1.5rem;
+            }
+            
+            .card-back {
+                padding: 1.25rem;
+            }
+            
+            .recipe-title {
+                font-size: 1.25rem;
+            }
+            
+            .recipe-text {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Evita lo scroll della pagina durante il drag */
+        body.dragging {
+            overflow: hidden;
+            cursor: grabbing;
+        }
+
+        /* Custom scrollbar per il back delle card */
+        .card-back::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .card-back::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .card-back::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <!-- Hero Section -->
+    <section class="section">
+        <div class="content-wrapper">
+            <div class="hero-content">
+                <h1>SMARMELLATA</h1>
+                <p class="subtitle">Tradizione Digitale</p>
+                <p class="description">
+                    Quando il design incontra la dolcezza. 
+                    Il regalo di Natale che unisce creatività e gusto dal 20XX.
+                </p>
+                <button class="btn" onclick="scrollToGenerator()">Scopri di più</button>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span>SCROLL</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- Generator Section -->
+    <section class="section generator-section" id="generator">
+        <div class="content-wrapper">
+            <h2 class="generator-title fade-in">RICETTE INNOVATIVE</h2>
+            <p class="generator-subtitle fade-in fade-in-delay-1">Abbinamenti esclusivi con Smarmellata</p>
+
+            <div class="category-tabs fade-in fade-in-delay-2">
+                <button class="category-tab active" data-category="antipasto">Antipasto</button>
+                <button class="category-tab" data-category="primo">Primo</button>
+                <button class="category-tab" data-category="secondo">Secondo</button>
+                <button class="category-tab" data-category="dolce">Dolce</button>
+                <button class="category-tab" data-category="cocktail">Cocktail</button>
+            </div>
+
+            <div class="cards-container fade-in fade-in-delay-3">
+                <div class="carousel-wrapper">
+                    <div class="card-track" id="cardTrack"></div>
+                </div>
+                <div class="swipe-hint">Trascina per sfogliare</div>
+            </div>
+
+            <div class="nav-dots fade-in fade-in-delay-4" id="navDots"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p class="footer-text">Made with love and code</p>
+        <p class="footer-copyright">© 2024 Immerso Studio • Christmas Edition</p>
+    </footer>
+
+    <script>
+        // Recipe data
+        const recipes = {
+            antipasto: [
+                {
+                    id: 1,
+                    title: "Bruschetta allo Speck",
+                    category: "Antipasto",
+                    image: "https://images.unsplash.com/photo-1600706471865-5df7e7a5f6c9?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "Pane di segale tostato",
+                        "100g di speck affumicato",
+                        "3 cucchiai di Smarmellata al Fico",
+                        "Ricotta di pecora",
+                        "Timo fresco",
+                        "Pepe nero"
+                    ],
+                    instructions: "Tostare il pane. Spalmare la ricotta, adagiare lo speck, completare con un cucchiaio di Smarmellata e timo fresco. Servire immediatamente.",
+                    prepTime: "15 min",
+                    cookTime: "5 min"
+                },
+                {
+                    id: 2,
+                    title: "Carpaccio di Zucchine",
+                    category: "Antipasto",
+                    image: "https://images.unsplash.com/photo-1603105037880-880cd4edfb0d?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "2 zucchine grandi",
+                        "4 cucchiai di Smarmellata agli Agrumi",
+                        "Scaglie di Parmigiano",
+                        "Pinoli tostati",
+                        "Olio EVO",
+                        "Menta fresca"
+                    ],
+                    instructions: "Affettare le zucchine a rondelle sottili. Disporre su piatto, condire con Smarmellata, pinoli, parmigiano e menta. Finire con un filo d'olio.",
+                    prepTime: "20 min",
+                    cookTime: "0 min"
+                },
+                {
+                    id: 3,
+                    title: "Tartare di Salmone",
+                    category: "Antipasto",
+                    image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "300g di salmone fresco",
+                        "2 cucchiai di Smarmellata al Limone",
+                        "Avocado maturo",
+                        "Cipollotto fresco",
+                        "Lime",
+                        "Aneto"
+                    ],
+                    instructions: "Tagliare il salmone a cubetti. Mescolare con Smarmellata, cipollotto e lime. Servire con avocado e guarnire con aneto.",
+                    prepTime: "25 min",
+                    cookTime: "0 min"
+                }
+            ],
+            primo: [
+                {
+                    id: 1,
+                    title: "Risotto al Radicchio",
+                    category: "Primo",
+                    image: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "320g riso Carnaroli",
+                        "1 radicchio rosso",
+                        "4 cucchiai di Smarmellata ai Frutti di Bosco",
+                        "1 scalogno",
+                        "Vino bianco",
+                        "Parmigiano Reggiano"
+                    ],
+                    instructions: "Soffriggere lo scalogno, aggiungere il riso e il radicchio. Sfumare con vino. A fine cottura mantecare con Smarmellata e parmigiano.",
+                    prepTime: "15 min",
+                    cookTime: "25 min"
+                },
+                {
+                    id: 2,
+                    title: "Gnocchi di Zucca",
+                    category: "Primo",
+                    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "500g gnocchi di zucca",
+                        "3 cucchiai di Smarmellata allo Zenzero",
+                        "Burro salato",
+                        "Salvia fresca",
+                        "Noci",
+                        "Pecorino"
+                    ],
+                    instructions: "Cuocere gli gnocchi. In padella fare fondere burro con salvia, aggiungere Smarmellata. Saltare gli gnocchi e servire con noci e pecorino.",
+                    prepTime: "10 min",
+                    cookTime: "8 min"
+                },
+                {
+                    id: 3,
+                    title: "Pasta alla Norcina",
+                    category: "Primo",
+                    image: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "400g pasta corta",
+                        "200g salsiccia",
+                        "4 cucchiai di Smarmellata ai Fichi",
+                        "Panna fresca",
+                        "Vino rosso",
+                        "Rosmarino"
+                    ],
+                    instructions: "Rosolare la salsiccia. Sfumare con vino, aggiungere panna e Smarmellata. Saltare la pasta nel sugo e guarnire con rosmarino.",
+                    prepTime: "15 min",
+                    cookTime: "20 min"
+                }
+            ],
+            secondo: [
+                {
+                    id: 1,
+                    title: "Filetto in Crosta",
+                    category: "Secondo",
+                    image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "4 filetti di manzo",
+                        "6 cucchiai di Smarmellata al Pepe Rosa",
+                        "Pasta sfoglia",
+                        "Senape di Digione",
+                        "Uovo",
+                        "Timo"
+                    ],
+                    instructions: "Spalmare i filetti con senape e Smarmellata. Avvolgere nella sfoglia, spennellare con uovo e cuocere in forno. Servire con riduzione al vino.",
+                    prepTime: "30 min",
+                    cookTime: "25 min"
+                },
+                {
+                    id: 2,
+                    title: "Anatra all'Arancia",
+                    category: "Secondo",
+                    image: "https://images.unsplash.com/photo-1551028150-64b9f398f678?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "1 anatra intera",
+                        "8 cucchiai di Smarmellata all'Arancia",
+                        "Vino Marsala",
+                        "Scalogno",
+                        "Burro",
+                        "Rosmarino"
+                    ],
+                    instructions: "Rosolare l'anatra. Preparare salsa con scalogno, Marsala e Smarmellata. Finire la cottura in forno bagnando con la salsa.",
+                    prepTime: "40 min",
+                    cookTime: "60 min"
+                },
+                {
+                    id: 3,
+                    title: "Branzino al Sale",
+                    category: "Secondo",
+                    image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "1 branzino di 1kg",
+                        "5 cucchiai di Smarmellata al Limone",
+                        "Sale grosso",
+                        "Rosmarino",
+                        "Aglio",
+                        "Limone"
+                    ],
+                    instructions: "Riempire il pesce con aglio e rosmarino. Ricoprire completamente di sale. Cuocere in forno. Servire con emulsione di Smarmellata e olio.",
+                    prepTime: "20 min",
+                    cookTime: "35 min"
+                }
+            ],
+            dolce: [
+                {
+                    id: 1,
+                    title: "Semifreddo alla Nocciola",
+                    category: "Dolce",
+                    image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "6 tuorli",
+                        "6 cucchiai di Smarmellata alla Nocciola",
+                        "Panna montata",
+                        "Biscotti savoiardi",
+                        "Cacao amaro",
+                        "Nocciole tostate"
+                    ],
+                    instructions: "Montare tuorli con Smarmellata. Incorporare panna. Stratificare con savoiardi in stampo. Congelare 6 ore. Servire con cacao e nocciole.",
+                    prepTime: "30 min",
+                    cookTime: "0 min"
+                },
+                {
+                    id: 2,
+                    title: "Tarte Tatin",
+                    category: "Dolce",
+                    image: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "6 mele renette",
+                        "8 cucchiai di Smarmellata di Mele",
+                        "Pasta brisée",
+                        "Burro",
+                        "Zucchero di canna",
+                        "Cannella"
+                    ],
+                    instructions: "Caramellare zucchero e burro. Disporre mele e Smarmellata. Coprire con pasta e cuocere in forno. Capovolgere a freddo.",
+                    prepTime: "40 min",
+                    cookTime: "35 min"
+                },
+                {
+                    id: 3,
+                    title: "Sfera di Cioccolato",
+                    category: "Dolce",
+                    image: "https://images.unsplash.com/photo-1483695028939-5bb13f8648b0?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "Cioccolato fondente",
+                        "4 cucchiai di Smarmellata alla Vaniglia",
+                        "Gelato alla vaniglia",
+                        "Olio di cocco",
+                        "Foglia d'oro",
+                        "Menta"
+                    ],
+                    instructions: "Creare sfera di cioccolato con Smarmellata all'interno. Riempire con gelato. Glassare con cioccolato lucido. Decorare con foglia d'oro.",
+                    prepTime: "45 min",
+                    cookTime: "10 min"
+                }
+            ],
+            cocktail: [
+                {
+                    id: 1,
+                    title: "Smarmello Sour",
+                    category: "Cocktail",
+                    image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "50ml Bourbon",
+                        "2 cucchiai di Smarmellata al Miele",
+                        "Succo di limone",
+                        "Albume",
+                        "Angostura bitters",
+                        "Scorza d'arancia"
+                    ],
+                    instructions: "Shakerare tutti gli ingredienti senza ghiaccio. Aggiungere ghiaccio e shakerare di nuovo. Filtrare in bicchiere. Guarnire con scorza.",
+                    prepTime: "5 min",
+                    cookTime: "0 min"
+                },
+                {
+                    id: 2,
+                    title: "Spritz Aromatico",
+                    category: "Cocktail",
+                    image: "https://images.unsplash.com/photo-1514361892633-396dd19b8a71?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "Prosecco",
+                        "2 cucchiai di Smarmellata agli Agrumi",
+                        "Aperol",
+                        "Acqua tonica",
+                        "Rosmarino",
+                        "Pompelmo rosa"
+                    ],
+                    instructions: "In bicchiere unire Smarmellata e Aperol. Aggiungere ghiaccio, prosecco e tonica. Mescolare delicatamente. Guarnire con rosmarino.",
+                    prepTime: "3 min",
+                    cookTime: "0 min"
+                },
+                {
+                    id: 3,
+                    title: "Old Fashioned Gourmet",
+                    category: "Cocktail",
+                    image: "https://images.unsplash.com/photo-1570598912132-0ba1dc952b7d?w=800&auto=format&fit=crop",
+                    ingredients: [
+                        "60ml Whisky Rye",
+                        "1 cucchiaio di Smarmellata al Whisky",
+                        "Zucchero di canna",
+                        "Angostura bitters",
+                        "Scorza d'arancia",
+                        "Ciliegia sotto spirito"
+                    ],
+                    instructions: "Sciogliere zucchero e Smarmellata con bitters. Aggiungere whisky e ghiaccio. Mescolare a lungo. Servire con scorza e ciliegia.",
+                    prepTime: "7 min",
+                    cookTime: "0 min"
+                }
+            ]
+        };
+
+        let currentCategory = 'antipasto';
+        let currentIndex = 0;
+        let isDragging = false;
+        let startPosition = 0;
+        let currentTranslate = 0;
+        let prevTranslate = 0;
+        let animationID = null;
+        let isClick = false;
+        let clickStartTime = 0;
+
+        function scrollToGenerator() {
+            document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function initCategoryTabs() {
+            const tabs = document.querySelectorAll('.category-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentCategory = tab.dataset.category;
+                    currentIndex = 0;
+                    renderCards();
+                    updateNavigation();
+                    setTrackPosition();
+                });
+            });
+        }
+
+        function renderCards() {
+            const categoryRecipes = recipes[currentCategory];
+            const cardTrack = document.getElementById('cardTrack');
+            cardTrack.innerHTML = '';
+            
+            categoryRecipes.forEach((recipe, index) => {
+                const card = document.createElement('div');
+                card.className = 'recipe-card';
+                if (index === currentIndex) {
+                    card.classList.add('active');
+                }
+                
+                card.innerHTML = `
+                    <div class="recipe-card-inner">
+                        <div class="card-front">
+                            <div class="card-image" style="background-image: url('${recipe.image}')"></div>
+                            <div class="card-content">
+                                <h3 class="card-title">${recipe.title}</h3>
+                                <p class="card-category">${recipe.category}</p>
+                                <p class="card-flip-hint">Clicca per la ricetta</p>
+                            </div>
+                        </div>
+                        <div class="card-back">
+                            <h3 class="recipe-title">${recipe.title}</h3>
+                            <div class="recipe-ingredients">
+                                <p class="recipe-section-title">Ingredienti</p>
+                                <p class="recipe-text">${recipe.ingredients.join(', ')}</p>
+                            </div>
+                            <div class="recipe-instructions">
+                                <p class="recipe-section-title">Preparazione</p>
+                                <p class="recipe-text">${recipe.instructions}</p>
+                            </div>
+                            <div class="recipe-time">
+                                <div class="time-item">
+                                    <p class="time-label">Preparazione</p>
+                                    <p class="time-value">${recipe.prepTime}</p>
+                                </div>
+                                <div class="time-item">
+                                    <p class="time-label">Cottura</p>
+                                    <p class="time-value">${recipe.cookTime}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Solo la carta attiva può essere cliccata
+                if (index === currentIndex) {
+                    card.addEventListener('click', handleCardClick);
+                }
+                
+                cardTrack.appendChild(card);
+            });
+            
+            setTrackPosition();
+            updateCardAppearance();
+        }
+
+        function handleCardClick(e) {
+            // Solo la carta attiva può essere girata
+            const card = e.currentTarget;
+            if (card.classList.contains('active')) {
+                card.classList.toggle('flipped');
+            }
+        }
+
+        function setTrackPosition() {
+            const cardTrack = document.getElementById('cardTrack');
+            const cardWidth = 320;
+            const gap = 60;
+            const totalWidth = cardWidth + gap;
+            const targetTranslate = -currentIndex * totalWidth;
+            
+            currentTranslate = targetTranslate;
+            prevTranslate = targetTranslate;
+            
+            cardTrack.style.transform = `translate(${targetTranslate}px, -50%)`;
+            
+            // Forza il reflow per assicurarsi che la transizione venga applicata
+            cardTrack.offsetHeight;
+        }
+
+        function updateCardAppearance() {
+            const cards = document.querySelectorAll('.recipe-card');
+            cards.forEach((card, index) => {
+                if (index === currentIndex) {
+                    card.classList.add('active');
+                    // Riattacca l'event listener per il click
+                    card.addEventListener('click', handleCardClick);
+                } else {
+                    card.classList.remove('active');
+                    card.classList.remove('flipped');
+                    // Rimuovi l'event listener per prevenire il flip
+                    card.removeEventListener('click', handleCardClick);
+                    // Disabilita completamente gli eventi
+                    card.style.pointerEvents = 'none';
+                }
+            });
+        }
+
+        function updateNavigation() {
+            const dotsContainer = document.getElementById('navDots');
+            const categoryRecipes = recipes[currentCategory];
+            
+            dotsContainer.innerHTML = '';
+            categoryRecipes.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = `nav-dot ${index === currentIndex ? 'active' : ''}`;
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    setTrackPosition();
+                    updateCardAppearance();
+                    updateNavigation();
+                });
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function initDragAndDrop() {
+            const carouselWrapper = document.querySelector('.carousel-wrapper');
+            const cardTrack = document.getElementById('cardTrack');
+            const categoryRecipes = recipes[currentCategory];
+            const cardWidth = 320;
+            const gap = 60;
+            const totalWidth = cardWidth + gap;
+            
+            // Event Listeners per mouse
+            carouselWrapper.addEventListener('mousedown', dragStart);
+            carouselWrapper.addEventListener('mousemove', drag);
+            carouselWrapper.addEventListener('mouseup', dragEnd);
+            carouselWrapper.addEventListener('mouseleave', dragEnd);
+            
+            // Event Listeners per touch
+            carouselWrapper.addEventListener('touchstart', dragStart);
+            carouselWrapper.addEventListener('touchmove', drag);
+            carouselWrapper.addEventListener('touchend', dragEnd);
+            
+            function dragStart(event) {
+                event.preventDefault();
+                isDragging = true;
+                isClick = true;
+                clickStartTime = Date.now();
+                startPosition = getPositionX(event);
+                cardTrack.style.transition = 'none';
+                cancelAnimationFrame(animationID);
+                
+                // Aggiungi classe al body per prevenire lo scroll
+                document.body.classList.add('dragging');
+            }
+            
+            function drag(event) {
+                if (!isDragging) return;
+                
+                const currentTime = Date.now();
+                // Se il drag è durato più di 100ms o si è mosso di più di 5px, non è un click
+                if (currentTime - clickStartTime > 100 || Math.abs(getPositionX(event) - startPosition) > 5) {
+                    isClick = false;
+                }
+                
+                const currentPosition = getPositionX(event);
+                currentTranslate = prevTranslate + currentPosition - startPosition;
+                cardTrack.style.transform = `translate(${currentTranslate}px, -50%)`;
+                
+                // Aggiorna l'aspetto delle carte durante il drag
+                updateCardOpacityDuringDrag();
+            }
+            
+            function dragEnd() {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                // Rimuovi la classe dal body
+                document.body.classList.remove('dragging');
+                
+                // Se era un click (breve e poco movimento), non cambiare carta
+                if (isClick && Math.abs(currentTranslate - prevTranslate) < 10) {
+                    cardTrack.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    cardTrack.style.transform = `translate(${prevTranslate}px, -50%)`;
+                    return;
+                }
+                
+                const movedBy = currentTranslate - prevTranslate;
+                const threshold = totalWidth * 0.25; // 25% della larghezza della carta
+                
+                if (Math.abs(movedBy) > threshold) {
+                    if (movedBy < 0 && currentIndex < categoryRecipes.length - 1) {
+                        currentIndex++;
+                    } else if (movedBy > 0 && currentIndex > 0) {
+                        currentIndex--;
+                    }
+                }
+                
+                setPositionByIndex();
+                isClick = false;
+            }
+            
+            function setPositionByIndex() {
+                const targetTranslate = -currentIndex * totalWidth;
+                currentTranslate = targetTranslate;
+                prevTranslate = targetTranslate;
+                
+                cardTrack.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                cardTrack.style.transform = `translate(${targetTranslate}px, -50%)`;
+                
+                // Resetta l'opacità delle carte
+                setTimeout(() => {
+                    updateCardAppearance();
+                    updateNavigation();
+                }, 50);
+            }
+            
+            function updateCardOpacityDuringDrag() {
+                const cards = document.querySelectorAll('.recipe-card');
+                const dragProgress = Math.abs(currentTranslate - prevTranslate) / (totalWidth * 0.5);
+                const maxOpacityReduction = 0.3;
+                
+                cards.forEach((card, index) => {
+                    if (index !== currentIndex) {
+                        const opacity = 0.4 + (dragProgress * maxOpacityReduction);
+                        card.style.opacity = Math.min(0.7, opacity);
+                    }
+                });
+            }
+            
+            function getPositionX(event) {
+                return event.type.includes('mouse') ? event.clientX : event.touches[0].clientX;
+            }
+        }
+
+        function initThreeJS() {
+            const canvas = document.getElementById('canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ 
+                canvas, 
+                alpha: true, 
+                antialias: true,
+                powerPreference: "high-performance"
+            });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.outputEncoding = THREE.sRGBEncoding;
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            const loader = new THREE.GLTFLoader();
+
+            loader.load(
+                'assets/1.glb',
+                function(gltf) {
+                    const model = gltf.scene;
+                    
+                    const box = new THREE.Box3().setFromObject(model);
+                    const center = box.getCenter(new THREE.Vector3());
+                    const size = box.getSize(new THREE.Vector3());
+                    
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = 1.8 / maxDim;
+                    model.scale.multiplyScalar(scale);
+                    
+                    model.position.sub(center.multiplyScalar(scale));
+                    
+                    model.traverse((child) => {
+                        if (child.isMesh) {
+                            child.material.metalness = 0.1;
+                            child.material.roughness = 0.8;
+                            child.material.envMapIntensity = 0.5;
+                        }
+                    });
+                    
+                    scene.add(model);
+                    
+                    // Animation
+                    function animate() {
+                        requestAnimationFrame(animate);
+                        model.rotation.y += 0.002;
+                        renderer.render(scene, camera);
+                    }
+                    animate();
+                },
+                undefined,
+                function(error) {
+                    console.error('Error loading GLB:', error);
+                }
+            );
+
+            camera.position.z = 4;
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.style.opacity = 0;
+            document.body.style.transition = 'opacity 1s ease';
+            
+            setTimeout(() => {
+                document.body.style.opacity = 1;
+                initThreeJS();
+                initCategoryTabs();
+                renderCards();
+                updateNavigation();
+                initDragAndDrop();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
