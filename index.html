@@ -59,7 +59,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            overflow: hidden; /* Blocca scroll interno */
         }
         
         /* Contenuto sezione */
@@ -730,24 +730,83 @@
             opacity: 1; transform: translateY(0);
         }
         
-        /* Media Queries per il responsive - Semplificate per brevità ma preservano la logica originale */
+        /* Media Queries per il responsive */
         @media (max-width: 1200px) {
             .main-title { font-size: 7rem; }
             .desktop-cards { grid-template-columns: repeat(2, 1fr); }
         }
+        
         @media (max-width: 992px) {
             .main-title { font-size: 5.5rem; margin-top: -40px; }
             .section-title { font-size: 3.5rem; }
         }
+        
         @media (max-width: 768px) {
             .main-title { font-size: 4rem; margin-top: -30px; }
             .desktop-cards { display: none; }
-            .mobile-cards-container { display: block; }
+            
+            /* MODIFICHE RICHIESTE: Mobile */
+            
+            /* Logo leggermente più piccolo */
+            .logo-fixed { width: 45px; top: 20px; left: 20px; }
+            
+            /* Contenitore Section 2: Flexbox per evitare scroll */
+            #section2 .section-content {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                height: 100%;
+                padding-top: 60px; /* Spazio per logo */
+                padding-bottom: 40px; /* Spazio per freccia */
+            }
+            
+            .categories-section {
+                margin-top: 10px;
+                display: flex;
+                flex-direction: column;
+                flex: 1; /* Prende lo spazio disponibile */
+                min-height: 0; /* Importante per flexbox scrolling */
+            }
+            
+            /* Tabs allineate a sinistra con linea */
+            .categories-tabs {
+                justify-content: flex-start;
+                padding-left: 20px; /* Allineamento iniziale */
+                padding-right: 20px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                margin-bottom: 20px;
+            }
+            
+            .category-tab:first-child { margin-left: 0; }
+            
+            /* Altezza dinamica cards per stare nello schermo */
+            .mobile-cards-container { 
+                display: block; 
+                flex: 1; /* Occupa lo spazio rimanente */
+                margin-top: 0;
+                min-height: auto; /* Rimuovi altezza minima fissa */
+                height: 100%; /* Forza altezza flex */
+                max-height: 55vh; /* Limite massimo per sicurezza */
+            }
+            
+            .mobile-card {
+                border-radius: 10px;
+            }
+            
+            .section-title {
+                margin-bottom: 10px;
+                font-size: 3rem;
+            }
+            
             .oranges-overlay-text { font-size: 1.5rem; letter-spacing: 2px; }
         }
+        
         @media (max-width: 576px) {
             .main-title { font-size: 3.2rem; }
             .section-title { font-size: 2.2rem; }
+            /* Logo ancora più piccolo su schermi molto piccoli */
+            .logo-fixed { width: 40px; top: 15px; left: 15px; }
         }
     </style>
 </head>
@@ -806,10 +865,7 @@
         <section id="section2" class="fullscreen-section">
             <div class="section-bg"></div>
             <div class="section-content">
-                <h1 class="section-title">LE COMBO</h1>
-                <p class="section-text">
-                    Scopri le nostre confetture artigianali abbinate a ricette esclusive. Una selezione che celebra la biodiversità italiana attraverso gusti unici.
-                </p>
+                <h1 class="section-title">LE Sricette</h1>
                 
                 <div class="categories-section">
                     <div class="categories-tabs">
@@ -855,7 +911,7 @@
             <span class="nav-label">SMARMELLATA 2025</span>
         </div>
         <div class="nav-dot" data-section="2">
-            <span class="nav-label">La Selezione</span>
+            <span class="nav-label">Le Sricette</span>
         </div>
         <div class="nav-dot" data-section="3">
             <span class="nav-label">Scappano Tutti</span>
@@ -1217,7 +1273,6 @@
         }
         
         // ==================== LOGICA CARDS E DATI ====================
-        // (Identico al codice originale ma manteniamo solo la struttura dati e le funzioni)
         const cardsData = {
             antipasto: [
                 { id: 1, title: "Lo Stagliere", ingredients: ["Pane tostato", "Pomodori", "Basilico", "Olio EVO"], instructions: ["Tagliare pomodori", "Condire", "Servire"] },
@@ -1242,7 +1297,6 @@
         };
 
         function getImagePath(category, index) {
-            // Placeholder per demo
              return `assets/IMG/RICETTE/${category} ${(index + 1).toString().padStart(2, '0')}.webp`;
         }
 
