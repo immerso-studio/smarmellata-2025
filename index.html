@@ -25,26 +25,82 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-        
-        html {
-            scroll-behavior: smooth;
-        }
-        
-        body {
-            background-color: #0a0a0a;
-            color: #ffffff;
-            overflow-x: hidden;
-            height: 100%;
-            font-family: 'Inter Tight', sans-serif;
-            font-weight: 400;
             -webkit-tap-highlight-color: transparent;
         }
         
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* BLOCCA LO SCROLL GENERALE QUI */
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Inter Tight', sans-serif;
+        }
+        
+        /* GLOBAL LOADER STYLES */
+        #global-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #050505;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+        }
+
+        .loader-content {
+            text-align: center;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .loader-logo {
+            font-family: 'AnalogueOS', sans-serif;
+            font-size: 2.5rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .loader-bar-bg {
+            width: 100%;
+            height: 2px;
+            background-color: rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 2px;
+        }
+
+        .loader-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background-color: #fbbf24;
+            transition: width 0.2s linear;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .loader-text {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            font-family: 'Inter Tight', monospace;
+        }
+
         /* Container principale */
         .main-container {
             position: relative;
-            height: 100vh;
+            height: 100%;
+            width: 100%;
             overflow-y: scroll;
             scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
@@ -52,14 +108,15 @@
         
         /* Sezioni a tutto schermo */
         .fullscreen-section {
-            height: 100vh;
+            height: 100vh; /* Fallback */
+            height: 100dvh; /* FIX MOBILE: Dynamic Viewport Height */
             width: 100%;
             scroll-snap-align: start;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* Blocca scroll interno */
+            overflow: hidden; /* FIX: Impedisce scroll interno */
         }
         
         /* Contenuto sezione */
@@ -71,6 +128,11 @@
             z-index: 2;
             opacity: 0;
             visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            /* FIX: Centratura perfetta */
+            justify-content: center; 
+            height: 100%;
         }
         
         .section-content.visible {
@@ -84,11 +146,6 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
         }
         
         #section1::before {
@@ -170,9 +227,11 @@
         /* Sezione 2 */
         #section2 {
             background: linear-gradient(135deg, rgba(0, 39, 146, 0.5) 0%, rgba(99, 0, 146, 0.9) 100%), url('assets/IMG/SFONDO/sfondo5.webp');
+            background-size: cover;
+            background-position: center;
         }
         
-        /* NUOVA SEZIONE 3 (ARANCE) */
+        /* SEZIONE 3 (ARANCE) */
         #section3 {
             background-color: #111;
             position: relative;
@@ -224,27 +283,13 @@
             font-family: 'AnalogueOS', sans-serif;
             font-size: 4.5rem;
             margin-bottom: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
             opacity: 0;
             transform: translateY(30px);
             animation: fadeInUp 1s 0.3s forwards;
             letter-spacing: -0.5px;
             line-height: 1.1;
-        }
-        
-        .section-text {
-            font-family: 'Inter Tight', sans-serif;
-            font-size: 1.3rem;
-            line-height: 1.8;
-            margin-bottom: 40px;
-            max-width: 800px;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 1s 0.5s forwards;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            width: 100%;
         }
         
         @keyframes fadeInUp {
@@ -329,7 +374,7 @@
         /* Scroll Arrow */
         .scroll-arrow {
             position: absolute;
-            bottom: 40px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             color: rgba(251, 191, 36, 0.8);
@@ -349,24 +394,6 @@
             60% { transform: translateX(-50%) translateY(-5px); }
         }
         
-        /* Progress bar */
-        .scroll-progress {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background-color: rgba(255, 255, 255, 0.1);
-            z-index: 1000;
-        }
-        
-        .scroll-progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #1a1a2e, #0f3460, #fbbf24, #16213e);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        
         .hero-content {
             position: relative;
             z-index: 10;
@@ -379,30 +406,25 @@
             padding-top: 60px;
         }
         
-        .model-loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #fbbf24;
-            font-size: 1.2rem;
-            z-index: 2;
-            font-family: 'Inter Tight', sans-serif;
-        }
-        
         /* Categorie e Cards */
         .categories-section {
-            margin-top: 50px;
+            margin-top: 20px;
             opacity: 0;
             transform: translateY(30px);
             animation: fadeInUp 1s 0.7s forwards;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            /* Flex per occupare lo spazio rimanente ma senza uscire */
+            flex: 1; 
+            min-height: 0;
         }
         
         .categories-tabs {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             flex-wrap: nowrap;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -450,8 +472,8 @@
             display: none;
             position: relative;
             width: 100%;
-            margin-top: 20px;
-            min-height: 350px;
+            flex: 1; /* Prende lo spazio disponibile */
+            min-height: 0; /* Permette al container di non sbordare */
         }
         
         .desktop-card {
@@ -478,9 +500,9 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 100%; /* Si adatta al container */
             background-color: rgba(255, 255, 255, 0.03);
-            border-radius: 5px;
+            border-radius: 12px;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: transform 0.5s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.5s ease;
@@ -488,9 +510,10 @@
             backdrop-filter: blur(10px);
             opacity: 0;
             transform: translateX(100%);
+            z-index: 1;
         }
         
-        .mobile-card.active { opacity: 1; transform: translateX(0); z-index: 2; }
+        .mobile-card.active { opacity: 1; transform: translateX(0); z-index: 5; }
         .mobile-card.previous { opacity: 0; transform: translateX(-100%); z-index: 1; }
         .mobile-card.next { opacity: 0; transform: translateX(100%); z-index: 1; }
         
@@ -548,60 +571,50 @@
             transform: translateY(-50%);
             display: flex;
             justify-content: space-between;
-            padding: 0 20px;
-            z-index: 10;
+            padding: 0 10px;
+            z-index: 20;
             pointer-events: none;
         }
         
         .mobile-nav-button {
             pointer-events: auto;
-            width: 50px;
-            height: 50px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         
-        .mobile-nav-button:hover {
-            background: rgba(251, 191, 36, 0.3);
-            border-color: rgba(251, 191, 36, 0.5);
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.2);
-        }
-        
-        .mobile-nav-button.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+        .mobile-nav-button.disabled { opacity: 0.3; cursor: default; }
         
         .cards-dots {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-top: 25px;
+            margin-top: 15px;
             z-index: 5;
+            padding-bottom: 10px;
         }
         
         .card-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 2px;
             background-color: rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
-            cursor: pointer;
         }
         
         .card-dot.active {
             background-color: #fbbf24;
             transform: scale(1.2);
-            border-radius: 2px;
         }
         
         /* Modale Ricetta */
@@ -632,7 +645,7 @@
             background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
             width: 90%;
             max-width: 800px;
-            max-height: 90vh;
+            max-height: 85vh;
             border-radius: 5px;
             overflow: hidden;
             border: 1px solid rgba(251, 191, 36, 0.2);
@@ -640,94 +653,45 @@
             transform: scale(0.9) translateY(30px);
             opacity: 0;
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s ease;
+            display: flex;
+            flex-direction: column;
         }
         
         .recipe-modal.active .recipe-modal-content { transform: scale(1) translateY(0); opacity: 1; }
         
         .recipe-modal-close {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
             background-color: rgba(0, 0, 0, 0.5);
-            border-radius: 5px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             cursor: pointer;
             z-index: 10;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
         }
-        
-        .recipe-modal-close:hover { background-color: rgba(251, 191, 36, 0.8); transform: scale(1.1); }
         
         .recipe-modal-image {
             width: 100%;
-            height: 300px;
-            overflow: hidden;
+            height: 250px;
+            flex-shrink: 0;
         }
         
         .recipe-modal-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.5s ease;
         }
         
         .recipe-modal-body {
-            padding: 40px;
+            padding: 30px;
             overflow-y: auto;
-            max-height: calc(90vh - 300px);
-        }
-        
-        .recipe-modal-title {
-            font-family: 'AnalogueOS', sans-serif;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: #fbbf24;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s;
-        }
-        
-        .recipe-modal.active .recipe-modal-title { opacity: 1; transform: translateY(0); }
-        
-        .recipe-modal-ingredients, .recipe-modal-instructions {
-            margin-bottom: 30px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        
-        .recipe-modal.active .recipe-modal-ingredients { opacity: 1; transform: translateY(0); transition-delay: 0.3s; }
-        .recipe-modal.active .recipe-modal-instructions { opacity: 1; transform: translateY(0); transition-delay: 0.4s; }
-        
-        .recipe-modal-ingredients h3, .recipe-modal-instructions h3 {
-            font-family: 'Inter Tight', sans-serif;
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #ffffff;
-        }
-        
-        .recipe-modal-ingredients ul, .recipe-modal-instructions ol {
-            padding-left: 20px;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.6;
-        }
-        
-        .recipe-modal-ingredients li, .recipe-modal-instructions li {
-            margin-bottom: 8px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        
-        .recipe-modal.active .recipe-modal-ingredients li, .recipe-modal.active .recipe-modal-instructions li {
-            opacity: 1; transform: translateY(0);
+            flex: 1;
         }
         
         /* Media Queries per il responsive */
@@ -745,76 +709,68 @@
             .main-title { font-size: 4rem; margin-top: -30px; }
             .desktop-cards { display: none; }
             
-            /* MODIFICHE RICHIESTE: Mobile */
+            /* Logo rimpicciolito mobile */
+            .logo-fixed { width: 40px; top: 20px; left: 20px; }
             
-            /* Logo leggermente più piccolo */
-            .logo-fixed { width: 45px; top: 20px; left: 20px; }
-            
-            /* Contenitore Section 2: Flexbox per evitare scroll */
+            /* Section 2 Layout Mobile */
             #section2 .section-content {
+                padding: 20px;
+                padding-top: 70px; /* Spazio logo */
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
-                height: 100%;
-                padding-top: 60px; /* Spazio per logo */
-                padding-bottom: 40px; /* Spazio per freccia */
+                justify-content: flex-start;
             }
-            
-            .categories-section {
-                margin-top: 10px;
-                display: flex;
-                flex-direction: column;
-                flex: 1; /* Prende lo spazio disponibile */
-                min-height: 0; /* Importante per flexbox scrolling */
+
+            .section-title {
+                font-size: 2.5rem;
+                margin-bottom: 15px;
             }
-            
-            /* Tabs allineate a sinistra con linea */
+
+            /* Tabs align left + scroll hint */
             .categories-tabs {
                 justify-content: flex-start;
-                padding-left: 20px; /* Allineamento iniziale */
+                padding-left: 5px;
                 padding-right: 20px;
                 padding-bottom: 15px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                margin-bottom: 20px;
+                margin-bottom: 15px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             }
             
-            .category-tab:first-child { margin-left: 0; }
-            
-            /* Altezza dinamica cards per stare nello schermo */
+            .category-tab {
+                font-size: 0.9rem;
+                padding: 8px 16px;
+            }
+
             .mobile-cards-container { 
                 display: block; 
-                flex: 1; /* Occupa lo spazio rimanente */
-                margin-top: 0;
-                min-height: auto; /* Rimuovi altezza minima fissa */
-                height: 100%; /* Forza altezza flex */
-                max-height: 55vh; /* Limite massimo per sicurezza */
-            }
-            
-            .mobile-card {
-                border-radius: 10px;
-            }
-            
-            .section-title {
+                /* Altezza controllata per stare nello schermo senza scroll */
+                height: auto;
+                flex: 1;
                 margin-bottom: 10px;
-                font-size: 3rem;
             }
             
-            .oranges-overlay-text { font-size: 1.5rem; letter-spacing: 2px; }
+            .oranges-overlay-text { font-size: 1.5rem; letter-spacing: 2px; width: 80%; }
         }
         
         @media (max-width: 576px) {
             .main-title { font-size: 3.2rem; }
-            .section-title { font-size: 2.2rem; }
-            /* Logo ancora più piccolo su schermi molto piccoli */
-            .logo-fixed { width: 40px; top: 15px; left: 15px; }
+            .hero-subtitle { font-size: 1.5rem; }
+            .logo-fixed { width: 35px; top: 15px; left: 15px; }
         }
     </style>
 </head>
 <body>
-    <div class="scroll-progress">
-        <div class="scroll-progress-bar" id="scrollProgress"></div>
+
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-logo">SMARMELLATA</div>
+            <div class="loader-bar-bg">
+                <div class="loader-bar-fill" id="loader-bar"></div>
+            </div>
+            <div class="loader-text" id="loader-text">Caricamento asset... 0%</div>
+        </div>
     </div>
-    
+
     <div class="logo-fixed">
         <img src="assets/IMG/LOGO/logo.webp" alt="SMARMELLATA Logo" class="logo-img">
     </div>
@@ -844,15 +800,12 @@
     <div class="main-container" id="mainContainer">
         <section id="section1" class="fullscreen-section">
             <div class="section-bg"></div>
-            
             <div id="model-container"></div>
             
             <div class="hero-content">
                 <div class="hero-title">
                     <span class="main-title">SMARMELLATA</span>
-                    <div class="hero-subtitle">
-                        il regalo natalizio meno corporate di sempre
-                    </div>
+                    <div class="hero-subtitle">il regalo natalizio meno corporate di sempre</div>
                     <div class="year-badge">EDIZIONE 2025</div>
                 </div>
             </div>
@@ -919,360 +872,320 @@
     </div>
     
     <script>
-        // ==================== THREE.JS: MAIN HERO (BARATTOLO) ====================
-        let mainModelData = { scene: null, camera: null, renderer: null, model: null, mixer: null };
-        let isMainModelInitialized = false;
+        // ==================== ASSET MANAGER & GLOBAL LOADER ====================
+        const assets = {
+            mainModel: null,
+            orangeModel: null,
+            animations: []
+        };
+
+        const manager = new THREE.LoadingManager();
+        const loaderBar = document.getElementById('loader-bar');
+        const loaderText = document.getElementById('loader-text');
+        const globalLoader = document.getElementById('global-loader');
+
+        manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+            const progress = (itemsLoaded / itemsTotal) * 100;
+            loaderBar.style.width = progress + '%';
+            loaderText.innerText = `Caricamento asset... ${Math.round(progress)}%`;
+        };
+
+        manager.onLoad = function () {
+            // Tutto caricato
+            setTimeout(() => {
+                globalLoader.style.opacity = '0';
+                globalLoader.style.visibility = 'hidden';
+                
+                // Avvia le scene solo ora che abbiamo i modelli
+                initMainScene();
+                // Inizializza la scena arance ma la mette in pausa finché non serve
+                initOrangesScene(); 
+            }, 500);
+        };
+
+        // Preload Models
+        const gltfLoader = new THREE.GLTFLoader(manager);
         
-        function initMainModel() {
-            if (isMainModelInitialized) return;
-            
+        // Carica Barattolo
+        gltfLoader.load('assets/Smarmellata.glb', (gltf) => {
+            assets.mainModel = gltf;
+        }, undefined, (err) => console.error('Errore loading Barattolo', err));
+
+        // Carica Arancia
+        gltfLoader.load('assets/Arancia.glb', (gltf) => {
+            assets.orangeModel = gltf;
+        }, undefined, (err) => {
+            console.warn('Errore loading Arancia, userò fallback', err);
+        });
+
+        // ==================== THREE.JS SCENE 1 (BARATTOLO) ====================
+        function initMainScene() {
+            if (!assets.mainModel) return;
+
             const container = document.getElementById('model-container');
+            const scene = new THREE.Scene();
             
-            // Scene setup
-            mainModelData.scene = new THREE.Scene();
-            mainModelData.scene.fog = new THREE.Fog(0x1a1a2e, 10, 30);
-            
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-            
-            mainModelData.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-            mainModelData.camera.position.set(0, 1, 5);
-            
-            mainModelData.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            mainModelData.renderer.setSize(width, height);
-            mainModelData.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            mainModelData.renderer.shadowMap.enabled = true;
-            mainModelData.renderer.outputEncoding = THREE.sRGBEncoding;
-            container.appendChild(mainModelData.renderer.domElement);
-            
-            // Lights
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 1, 5);
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            container.appendChild(renderer.domElement);
+
+            // Luci
             const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-            mainModelData.scene.add(ambientLight);
-            
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-            directionalLight.position.set(5, 5, 5);
-            directionalLight.castShadow = true;
-            mainModelData.scene.add(directionalLight);
-            
-            const pointLight = new THREE.PointLight(0xfbbf24, 1, 1);
-            pointLight.position.set(-3, 3, 3);
-            mainModelData.scene.add(pointLight);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            dirLight.position.set(5, 5, 5);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+            const pLight = new THREE.PointLight(0xfbbf24, 1.2, 10);
+            pLight.position.set(-2, 2, 2);
+            scene.add(pLight);
 
-            // Loading message
-            const loadingElement = document.createElement('div');
-            loadingElement.className = 'model-loading';
-            loadingElement.textContent = 'Caricamento modello...';
-            container.appendChild(loadingElement);
+            // Modello
+            const model = assets.mainModel.scene;
+            model.scale.set(12, 12, 12);
+            model.position.set(0, -0.5, 0);
             
-            const loader = new THREE.GLTFLoader();
-            loader.load(
-                'assets/Smarmellata.glb',
-                function(gltf) {
-                    mainModelData.model = gltf.scene;
-                    mainModelData.scene.add(mainModelData.model);
-                    mainModelData.model.position.set(0, 0, 0);
-                    mainModelData.model.scale.set(12, 12, 12);
-                    
-                    mainModelData.model.traverse(function(child) {
-                        if (child.isMesh) {
-                            child.castShadow = true;
-                            child.receiveShadow = true;
-                            if (child.material) {
-                                child.material.metalness = 0.5;
-                                child.material.roughness = 0.8;
-                            }
-                        }
-                    });
-                    
-                    if (gltf.animations && gltf.animations.length) {
-                        mainModelData.mixer = new THREE.AnimationMixer(mainModelData.model);
-                        gltf.animations.forEach((clip) => {
-                            mainModelData.mixer.clipAction(clip).play();
-                        });
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    if(child.material) {
+                        child.material.roughness = 0.6;
+                        child.material.metalness = 0.4;
                     }
-                    container.removeChild(loadingElement);
-                },
-                function(xhr) {
-                    loadingElement.textContent = 'Caricamento: ' + Math.round(xhr.loaded / xhr.total * 100) + '%';
-                },
-                function(error) {
-                    console.error('Errore modello Hero', error);
-                    createFallbackModel(); // Implementare se necessario
-                    container.removeChild(loadingElement);
                 }
-            );
-            
-            isMainModelInitialized = true;
-            
-            const clock = new THREE.Clock();
-            function animateMain() {
-                requestAnimationFrame(animateMain);
-                if (mainModelData.mixer) mainModelData.mixer.update(clock.getDelta());
-                if (mainModelData.model) {
-                    mainModelData.model.rotation.y += 0.005;
-                    mainModelData.model.position.y = Math.sin(Date.now() * 0.001) * 0.1;
-                }
-                mainModelData.renderer.render(mainModelData.scene, mainModelData.camera);
+            });
+            scene.add(model);
+
+            // Animazione Mixer
+            let mixer = null;
+            if (assets.mainModel.animations.length) {
+                mixer = new THREE.AnimationMixer(model);
+                assets.mainModel.animations.forEach(clip => mixer.clipAction(clip).play());
             }
-            animateMain();
-            
-            // Resize handler per main model
-            window.addEventListener('resize', function() {
-                const w = container.clientWidth;
-                const h = container.clientHeight;
-                mainModelData.camera.aspect = w / h;
-                mainModelData.camera.updateProjectionMatrix();
-                mainModelData.renderer.setSize(w, h);
+
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const delta = clock.getDelta();
+                if (mixer) mixer.update(delta);
+                
+                // Rotazione idle
+                model.rotation.y += 0.003;
+                model.position.y = -0.5 + Math.sin(Date.now() * 0.001) * 0.05;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
             });
-            
-            // Mouse interact
-            document.addEventListener('mousemove', function(event) {
-                if (!mainModelData.model) return;
-                const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-                const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-                mainModelData.model.rotation.x = Math.PI * 0.1 + mouseY * 0.1;
-                mainModelData.model.rotation.z = mouseX * 0.1;
+
+            // Mouse parallax
+            document.addEventListener('mousemove', (e) => {
+                const mx = (e.clientX / window.innerWidth) * 2 - 1;
+                const my = -(e.clientY / window.innerHeight) * 2 + 1;
+                model.rotation.x = mx * 0.1;
+                model.rotation.z = my * 0.05;
             });
         }
 
-        // Fallback per modello Hero
-        function createFallbackModel() {
-            const geometry = new THREE.CylinderGeometry(1.5, 1.5, 3, 32);
-            const material = new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.3, metalness: 0.2 });
-            mainModelData.model = new THREE.Mesh(geometry, material);
-            mainModelData.scene.add(mainModelData.model);
-        }
-
-        // ==================== THREE.JS: ORANGES SCENE (SEZIONE 3) ====================
-        let orangesData = { scene: null, camera: null, renderer: null, oranges: [] };
-        let isOrangesInitialized = false;
-
+        // ==================== THREE.JS SCENE 3 (ARANCE) ====================
         function initOrangesScene() {
-            if (isOrangesInitialized) return;
-
             const container = document.getElementById('oranges-canvas-container');
-            const config = {
-                bgColor: 0x111111,
-                count: { mobile: 40, desktop: 80 },
-                mouseRadius: { mobile: 0.25, desktop: 0.25 },
-                fleeForce: 0.05,
-                gravity: 0.0015,
-                friction: 0.98,
-                returnSpeed: 0.05
-            };
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
 
             const isMobile = window.innerWidth < 768;
-            
-            orangesData.scene = new THREE.Scene();
-            orangesData.scene.background = new THREE.Color(config.bgColor);
-            
-            let aspect = container.clientWidth / container.clientHeight;
             const viewSize = 2;
-            
-            orangesData.camera = new THREE.OrthographicCamera(
-                -viewSize * aspect, viewSize * aspect, viewSize, -viewSize, 0.1, 1000
+            let aspect = container.clientWidth / container.clientHeight;
+
+            const camera = new THREE.OrthographicCamera(
+                -viewSize * aspect, viewSize * aspect, viewSize, -viewSize, 0.1, 100
             );
-            orangesData.camera.position.z = 10;
+            camera.position.z = 10;
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Luci
+            scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+            const dl = new THREE.DirectionalLight(0xffffff, 0.8);
+            dl.position.set(2, 5, 5);
+            scene.add(dl);
+
+            // Spawn Arance
+            const oranges = [];
+            const count = isMobile ? 35 : 70;
             
-            orangesData.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-            orangesData.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            orangesData.renderer.setSize(container.clientWidth, container.clientHeight);
-            container.appendChild(orangesData.renderer.domElement);
+            // Crea master geometry dal GLB precaricato o fallback
+            let masterGeo = new THREE.Group();
             
-            // Luci Oranges
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            orangesData.scene.add(ambientLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
-            dirLight.position.set(5, 10, 7);
-            orangesData.scene.add(dirLight);
-            const fillLight = new THREE.PointLight(0xffaa00, 0.5);
-            fillLight.position.set(-5, -5, 5);
-            orangesData.scene.add(fillLight);
-            
-            const loader = new THREE.GLTFLoader();
-            loader.load('assets/Arancia.glb', function (gltf) {
-                const model = gltf.scene;
-                const box = new THREE.Box3().setFromObject(model);
+            if (assets.orangeModel) {
+                const rawModel = assets.orangeModel.scene.clone();
+                // Normalizza dimensione
+                const box = new THREE.Box3().setFromObject(rawModel);
                 const size = box.getSize(new THREE.Vector3());
                 const maxDim = Math.max(size.x, size.y, size.z);
-                const scaleFactor = 2 / maxDim;
-                
-                const center = box.getCenter(new THREE.Vector3());
-                model.position.sub(center);
-                const wrapper = new THREE.Group();
-                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-                wrapper.add(model);
-                
-                spawnOranges(wrapper);
-            }, undefined, function (error) {
-                // Fallback Arancia (Sfera)
-                const geometry = new THREE.SphereGeometry(0.5, 32, 32);
-                const material = new THREE.MeshStandardMaterial({ color: 0xffa500, roughness: 0.5 });
-                const sphere = new THREE.Mesh(geometry, material);
-                spawnOranges(sphere);
-            });
-            
-            function spawnOranges(masterModel) {
-                const count = isMobile ? config.count.mobile : config.count.desktop;
-                const limitX = viewSize * aspect;
-                const limitY = viewSize;
-                
-                for (let i = 0; i < count; i++) {
-                    const orange = masterModel.clone();
-                    const baseScale = 0.20 + Math.random() * 0.15;
-                    orange.scale.set(baseScale, baseScale, baseScale);
-                    
-                    let x, y, attempts = 0, overlap = true;
-                    const myRadius = baseScale * 0.5;
-                    
-                    while(overlap && attempts < 50) {
-                        x = (Math.random() - 0.5) * 2 * (limitX - myRadius);
-                        y = (Math.random() - 0.5) * 2 * (limitY - myRadius);
-                        overlap = false;
-                        for(let existing of orangesData.oranges) {
-                            const dx = x - existing.position.x;
-                            const dy = y - existing.position.y;
-                            if(Math.sqrt(dx*dx + dy*dy) < (myRadius + existing.userData.radius)) {
-                                overlap = true; break;
-                            }
-                        }
-                        attempts++;
-                    }
-                    orange.position.set(x, y, (Math.random() - 0.5) * 0.5);
-                    orange.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
-                    
-                    orange.userData = {
-                        velocity: new THREE.Vector3(0, 0, 0),
-                        baseScale: new THREE.Vector3(baseScale, baseScale, baseScale),
-                        rotSpeed: new THREE.Vector3((Math.random()-0.5)*0.02, (Math.random()-0.5)*0.02, 0),
-                        radius: myRadius
-                    };
-                    orangesData.scene.add(orange);
-                    orangesData.oranges.push(orange);
-                }
+                const s = 2 / maxDim; 
+                rawModel.scale.set(s, s, s);
+                masterGeo.add(rawModel);
+            } else {
+                // Fallback
+                const mesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(1, 16, 16),
+                    new THREE.MeshStandardMaterial({ color: 0xffa500 })
+                );
+                masterGeo.add(mesh);
             }
-            
-            // Mouse Physics Setup
-            const mouse = new THREE.Vector2(-1000, -1000);
+
+            for(let i=0; i<count; i++) {
+                const o = masterGeo.clone();
+                const scale = 0.15 + Math.random() * 0.1;
+                o.scale.multiplyScalar(scale);
+                
+                // Pos random
+                o.position.set(
+                    (Math.random()-0.5) * 4 * aspect,
+                    (Math.random()-0.5) * 4,
+                    (Math.random()-0.5) * 0.5
+                );
+                o.rotation.set(Math.random()*3, Math.random()*3, 0);
+                
+                o.userData = {
+                    vel: new THREE.Vector3(0,0,0),
+                    rotVel: new THREE.Vector3((Math.random()-0.5)*0.02, (Math.random()-0.5)*0.02, 0),
+                    radius: scale * 0.9, // approx collision radius
+                    baseScale: o.scale.clone()
+                };
+                
+                scene.add(o);
+                oranges.push(o);
+            }
+
+            // Mouse interaction
+            const mouse = new THREE.Vector3(-100, -100, 0);
             const raycaster = new THREE.Raycaster();
-            const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-            const mouse3D = new THREE.Vector3();
-            
-            function updateMouse(clientX, clientY) {
-                // Calcola coordinate relative al container, non alla finestra intera
+            const plane = new THREE.Plane(new THREE.Vector3(0,0,1), 0);
+
+            function updateMouse(x, y) {
                 const rect = container.getBoundingClientRect();
-                const x = clientX - rect.left;
-                const y = clientY - rect.top;
-                
-                // Normalizza per Three.js
-                mouse.x = (x / container.clientWidth) * 2 - 1;
-                mouse.y = -(y / container.clientHeight) * 2 + 1;
-                
-                raycaster.setFromCamera(mouse, orangesData.camera);
-                raycaster.ray.intersectPlane(plane, mouse3D);
+                const mx = ((x - rect.left) / container.clientWidth) * 2 - 1;
+                const my = -((y - rect.top) / container.clientHeight) * 2 + 1;
+                raycaster.setFromCamera({x: mx, y: my}, camera);
+                raycaster.ray.intersectPlane(plane, mouse);
             }
-            
+
             document.addEventListener('mousemove', e => updateMouse(e.clientX, e.clientY));
             document.addEventListener('touchmove', e => {
-                if(e.touches.length > 0) updateMouse(e.touches[0].clientX, e.touches[0].clientY);
+                if(e.touches.length) updateMouse(e.touches[0].clientX, e.touches[0].clientY);
             }, {passive: false});
-            
-            // Animation Loop Oranges
-            function animateOranges() {
-                requestAnimationFrame(animateOranges);
+
+            // Loop
+            function animate() {
+                requestAnimationFrame(animate);
                 
-                // Aggiorna limiti basati su aspect corrente
-                const currentLimitX = viewSize * (container.clientWidth / container.clientHeight);
-                const currentLimitY = viewSize;
-                const mouseRadius = isMobile ? config.mouseRadius.mobile : config.mouseRadius.desktop;
-                
-                orangesData.oranges.forEach(orange => {
-                    const data = orange.userData;
-                    data.velocity.y -= config.gravity; // Gravity
+                // Limiti
+                const limitX = viewSize * (container.clientWidth / container.clientHeight);
+                const limitY = viewSize;
+                const mouseR = 0.5;
+
+                oranges.forEach(o => {
+                    const ud = o.userData;
                     
-                    // Fuga dal mouse
-                    const dx = orange.position.x - mouse3D.x;
-                    const dy = orange.position.y - mouse3D.y;
+                    // Gravità leggera
+                    ud.vel.y -= 0.001;
+
+                    // Mouse repel
+                    const dx = o.position.x - mouse.x;
+                    const dy = o.position.y - mouse.y;
                     const dist = Math.sqrt(dx*dx + dy*dy);
-                    
-                    if (dist < mouseRadius * 2) {
-                        const force = (1 - dist / (mouseRadius * 2)) * config.fleeForce;
-                        const angle = Math.atan2(dy, dx);
-                        data.velocity.x += Math.cos(angle) * force;
-                        data.velocity.y += Math.sin(angle) * force;
-                        orange.scale.set(data.baseScale.x*(1+force), data.baseScale.y*(1-force*0.5), data.baseScale.z*(1-force*0.5));
-                    } else {
-                        orange.scale.lerp(data.baseScale, config.returnSpeed);
+                    if(dist < mouseR) {
+                        const f = (1 - dist/mouseR) * 0.05;
+                        const ang = Math.atan2(dy, dx);
+                        ud.vel.x += Math.cos(ang) * f;
+                        ud.vel.y += Math.sin(ang) * f;
                     }
+
+                    // Move
+                    o.position.add(ud.vel);
+                    ud.vel.multiplyScalar(0.98); // Friction
                     
-                    orange.position.add(data.velocity);
-                    data.velocity.multiplyScalar(config.friction);
-                    
-                    // Bordi
-                    const r = data.radius;
-                    if(orange.position.x > currentLimitX-r) { orange.position.x = currentLimitX-r; data.velocity.x *= -0.6; }
-                    else if(orange.position.x < -currentLimitX+r) { orange.position.x = -currentLimitX+r; data.velocity.x *= -0.6; }
-                    if(orange.position.y > currentLimitY-r) { orange.position.y = currentLimitY-r; data.velocity.y *= -0.6; }
-                    else if(orange.position.y < -currentLimitY+r) { orange.position.y = -currentLimitY+r; data.velocity.y *= -0.6; }
-                    
-                    orange.rotation.x += data.rotSpeed.x + data.velocity.y * 0.2;
-                    orange.rotation.y += data.rotSpeed.y - data.velocity.x * 0.2;
+                    // Rotate
+                    o.rotation.x += ud.rotVel.x + ud.vel.y;
+                    o.rotation.y += ud.rotVel.y - ud.vel.x;
+
+                    // Walls
+                    if(o.position.x > limitX) { o.position.x = limitX; ud.vel.x *= -0.8; }
+                    if(o.position.x < -limitX) { o.position.x = -limitX; ud.vel.x *= -0.8; }
+                    if(o.position.y > limitY) { o.position.y = limitY; ud.vel.y *= -0.8; }
+                    if(o.position.y < -limitY) { o.position.y = -limitY; ud.vel.y *= -0.8; }
                 });
-                
-                // Collisioni semplificate
-                for (let i = 0; i < orangesData.oranges.length; i++) {
-                    for (let j = i + 1; j < orangesData.oranges.length; j++) {
-                        const o1 = orangesData.oranges[i];
-                        const o2 = orangesData.oranges[j];
-                        const dx = o1.position.x - o2.position.x;
-                        const dy = o1.position.y - o2.position.y;
-                        const distSq = dx*dx + dy*dy;
-                        const minDist = o1.userData.radius + o2.userData.radius;
+
+                // Collisioni semplici (N^2 ottimizzato)
+                for(let i=0; i<oranges.length; i++) {
+                    for(let j=i+1; j<oranges.length; j++) {
+                        const a = oranges[i];
+                        const b = oranges[j];
+                        const dx = a.position.x - b.position.x;
+                        const dy = a.position.y - b.position.y;
+                        const dSq = dx*dx + dy*dy;
+                        const rSum = a.userData.radius + b.userData.radius;
                         
-                        if(distSq < minDist*minDist && distSq > 0.0001) {
-                            const dist = Math.sqrt(distSq);
-                            const overlap = minDist - dist;
-                            const nx = dx/dist; 
-                            const ny = dy/dist;
+                        if(dSq < rSum*rSum) {
+                            const dist = Math.sqrt(dSq) || 0.001;
+                            const overlap = rSum - dist;
+                            const nx = dx / dist; 
+                            const ny = dy / dist;
                             
-                            o1.position.x += nx*overlap*0.5; o1.position.y += ny*overlap*0.5;
-                            o2.position.x -= nx*overlap*0.5; o2.position.y -= ny*overlap*0.5;
+                            // Separate
+                            const sep = overlap * 0.5;
+                            a.position.x += nx * sep; a.position.y += ny * sep;
+                            b.position.x -= nx * sep; b.position.y -= ny * sep;
                             
-                            const dvx = o1.userData.velocity.x - o2.userData.velocity.x;
-                            const dvy = o1.userData.velocity.y - o2.userData.velocity.y;
-                            const velNormal = dvx*nx + dvy*ny;
+                            // Bounce impulse
+                            const rVelX = a.userData.vel.x - b.userData.vel.x;
+                            const rVelY = a.userData.vel.y - b.userData.vel.y;
+                            const velN = rVelX * nx + rVelY * ny;
                             
-                            if(velNormal < 0) {
-                                const j = -(1.6) * velNormal / 2;
-                                o1.userData.velocity.x += j*nx; o1.userData.velocity.y += j*ny;
-                                o2.userData.velocity.x -= j*nx; o2.userData.velocity.y -= j*ny;
+                            if(velN < 0) {
+                                const imp = velN * -1.5 * 0.5; 
+                                a.userData.vel.x += nx * imp; a.userData.vel.y += ny * imp;
+                                b.userData.vel.x -= nx * imp; b.userData.vel.y -= ny * imp;
                             }
                         }
                     }
                 }
-                
-                orangesData.renderer.render(orangesData.scene, orangesData.camera);
+
+                renderer.render(scene, camera);
             }
-            
-            animateOranges();
-            isOrangesInitialized = true;
-            
-            // Resize Oranges
-            window.addEventListener('resize', function() {
+            animate();
+
+            window.addEventListener('resize', () => {
                 const w = container.clientWidth;
                 const h = container.clientHeight;
-                const newAspect = w / h;
-                
-                orangesData.camera.left = -viewSize * newAspect;
-                orangesData.camera.right = viewSize * newAspect;
-                orangesData.camera.top = viewSize;
-                orangesData.camera.bottom = -viewSize;
-                orangesData.camera.updateProjectionMatrix();
-                orangesData.renderer.setSize(w, h);
+                aspect = w/h;
+                camera.left = -viewSize * aspect;
+                camera.right = viewSize * aspect;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
             });
         }
-        
-        // ==================== LOGICA CARDS E DATI ====================
+
+        // ==================== LOGIC: CARDS & UI ====================
         const cardsData = {
             antipasto: [
                 { id: 1, title: "Lo Stagliere", ingredients: ["Pane tostato", "Pomodori", "Basilico", "Olio EVO"], instructions: ["Tagliare pomodori", "Condire", "Servire"] },
@@ -1296,9 +1209,19 @@
             ]
         };
 
+        // Gestione percorsi immagini robusta
         function getImagePath(category, index) {
-             return `assets/IMG/RICETTE/${category} ${(index + 1).toString().padStart(2, '0')}.webp`;
+            // Assicura che la categoria sia lowercase per il path
+            const catLower = category.toLowerCase();
+            // Formatta index a 2 cifre (01, 02)
+            const num = (index + 1).toString().padStart(2, '0');
+            // Costruisci path. NOTA: Assicurati che su server la cartella sia 'assets/IMG/RICETTE' o 'assets/img/ricette'
+            // Qui assumiamo la struttura esatta usata nel CSS
+            return `assets/IMG/RICETTE/${category} ${num}.webp`;
         }
+
+        // Placeholder fallback per le immagini
+        const PLACEHOLDER_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 800 600'%3E%3Crect fill='%23333' width='800' height='600'/%3E%3Ctext fill='%23fff' x='50%25' y='50%25' text-anchor='middle' font-family='sans-serif' font-size='30'%3EImmagine non trovata%3C/text%3E%3C/svg%3E";
 
         let currentCategory = 'antipasto';
         let currentMobileCardIndex = 0;
@@ -1323,18 +1246,21 @@
                 currentMobileCardIndex = 0;
 
                 list.forEach((card, idx) => {
-                    const img = getImagePath(cat, idx);
+                    const imgPath = getImagePath(cat, idx);
+                    
                     // Desktop
                     const dCard = document.createElement('div');
                     dCard.className = 'desktop-card';
-                    dCard.innerHTML = `<div class="card-image"><img src="${img}" onerror="this.src='https://via.placeholder.com/400x600/333/fff?text=${card.title}'"></div><div class="card-content"><h3 class="card-title">${card.title}</h3></div>`;
+                    dCard.innerHTML = `<div class="card-image"><img src="${imgPath}" alt="${card.title}" loading="lazy"></div><div class="card-content"><h3 class="card-title">${card.title}</h3></div>`;
+                    dCard.querySelector('img').onerror = function() { this.src = PLACEHOLDER_IMG; };
                     dCard.onclick = () => openRecipeModal(cat, idx);
                     desktopCards.appendChild(dCard);
 
                     // Mobile
                     const mCard = document.createElement('div');
                     mCard.className = `mobile-card ${idx===0?'active':(idx===1?'next':'previous')}`;
-                    mCard.innerHTML = `<div class="card-image"><img src="${img}" onerror="this.src='https://via.placeholder.com/400x600/333/fff?text=${card.title}'"></div><div class="card-content"><h3 class="card-title">${card.title}</h3></div>`;
+                    mCard.innerHTML = `<div class="card-image"><img src="${imgPath}" alt="${card.title}" loading="lazy"></div><div class="card-content"><h3 class="card-title">${card.title}</h3></div>`;
+                    mCard.querySelector('img').onerror = function() { this.src = PLACEHOLDER_IMG; };
                     mCard.onclick = () => openRecipeModal(cat, idx);
                     mobileCardsContainer.appendChild(mCard);
 
@@ -1349,8 +1275,14 @@
             }
 
             function bindMobileEvents() {
-                document.getElementById('mobilePrevButton').onclick = () => { if(currentMobileCardIndex > 0) updateMobileView(currentMobileCardIndex - 1); };
-                document.getElementById('mobileNextButton').onclick = () => { if(currentMobileCardIndex < totalCards - 1) updateMobileView(currentMobileCardIndex + 1); };
+                document.getElementById('mobilePrevButton').onclick = (e) => { 
+                    e.stopPropagation(); 
+                    if(currentMobileCardIndex > 0) updateMobileView(currentMobileCardIndex - 1); 
+                };
+                document.getElementById('mobileNextButton').onclick = (e) => { 
+                    e.stopPropagation(); 
+                    if(currentMobileCardIndex < totalCards - 1) updateMobileView(currentMobileCardIndex + 1); 
+                };
             }
 
             function updateMobileView(index) {
@@ -1382,8 +1314,10 @@
             const data = cardsData[cat][idx];
             const modal = document.getElementById('recipeModal');
             document.getElementById('modalTitle').textContent = data.title;
-            document.getElementById('modalImage').src = getImagePath(cat, idx);
-            document.getElementById('modalImage').onerror = function(){this.src=`https://via.placeholder.com/800x400/333/fff?text=${data.title}`};
+            const imgPath = getImagePath(cat, idx);
+            const modalImg = document.getElementById('modalImage');
+            modalImg.src = imgPath;
+            modalImg.onerror = function() { this.src = PLACEHOLDER_IMG; };
             
             const ingList = document.getElementById('modalIngredients');
             ingList.innerHTML = '';
@@ -1402,52 +1336,39 @@
 
         document.getElementById('modalClose').onclick = () => document.getElementById('recipeModal').classList.remove('active');
 
-        // ==================== NAVIGAZIONE E INIZIALIZZAZIONE ====================
+        // ==================== SCROLL OBSERVER ====================
         document.addEventListener('DOMContentLoaded', function() {
             const sections = document.querySelectorAll('.fullscreen-section');
             const navDots = document.querySelectorAll('.nav-dot');
-            const mainContainer = document.getElementById('mainContainer');
-            const scrollProgress = document.getElementById('scrollProgress');
-
+            
             initCardsSystem();
 
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
-                    if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+                    if (entry.isIntersecting && entry.intersectionRatio >= 0.4) {
                         const id = entry.target.id;
-                        
-                        // Attiva nav dot
                         const num = id.replace('section', '');
+                        
+                        // Nav updates
                         navDots.forEach(d => d.classList.toggle('active', d.dataset.section === num));
                         
-                        // Animazioni contenuto
+                        // Show content
                         const content = entry.target.querySelector('.section-content');
                         if(content) content.classList.add('visible');
-                        
-                        // Init ThreeJS lazy loading
-                        if(id === 'section1') setTimeout(initMainModel, 100);
-                        if(id === 'section3') setTimeout(initOrangesScene, 100);
                     }
                 });
-            }, { threshold: 0.5 });
+            }, { threshold: 0.4 });
 
             sections.forEach(s => observer.observe(s));
 
-            // Scroll Progress
-            mainContainer.addEventListener('scroll', () => {
-                const h = mainContainer.scrollHeight - mainContainer.clientHeight;
-                const w = (mainContainer.scrollTop / h) * 100;
-                scrollProgress.style.width = w + '%';
-            });
-
-            // Click Nav Dots
+            // Nav dots click
             navDots.forEach(dot => {
                 dot.onclick = function() {
-                    scrollToSection(this.dataset.section);
+                    document.getElementById(`section${this.dataset.section}`).scrollIntoView({behavior: 'smooth'});
                 }
             });
         });
-
+        
         function scrollToSection(num) {
             document.getElementById(`section${num}`).scrollIntoView({behavior: 'smooth'});
         }
