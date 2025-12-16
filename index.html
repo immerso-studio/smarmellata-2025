@@ -965,14 +965,14 @@
         let mainModelData = { scene: null, camera: null, renderer: null, model: null, mixer: null };
         let isMainModelInitialized = false;
         
-function initMainModel() {
+        function initMainModel() {
             if (isMainModelInitialized) return;
             
             const container = document.getElementById('model-container');
             
             // Scene setup
             mainModelData.scene = new THREE.Scene();
-            // Nebbia scura per fondere il modello con il background (Resta invariata)
+            // Nebbia scura per fondere il modello con il background
             mainModelData.scene.fog = new THREE.Fog(0x0a0a0a, 10, 30);
             
             const width = container.clientWidth;
@@ -981,7 +981,7 @@ function initMainModel() {
             mainModelData.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
             mainModelData.camera.position.set(0, 1, 5);
             
-            // --- MODIFICA RENDERER PER PBR ---
+            // FIX RENDER: logarithmicDepthBuffer per evitare linee di z-fighting
             mainModelData.renderer = new THREE.WebGLRenderer({ 
                 alpha: true, 
                 antialias: true,
@@ -991,48 +991,23 @@ function initMainModel() {
             mainModelData.renderer.setSize(width, height);
             mainModelData.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             mainModelData.renderer.shadowMap.enabled = true;
-            mainModelData.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            
-            // Impostazioni cruciali per il realismo dei materiali metallici
+            mainModelData.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Ombre più morbide
             mainModelData.renderer.outputEncoding = THREE.sRGBEncoding;
-            mainModelData.renderer.toneMapping = THREE.ACESFilmicToneMapping; // Tone mapping cinematografico
-            mainModelData.renderer.toneMappingExposure = 0.7; // Regola la luminosità globale
-            
             container.appendChild(mainModelData.renderer.domElement);
             
-            // --- CARICAMENTO HDRI CUBICO (ENV MAP) ---
-            // Assicurati di avere le 6 immagini in assets/env/
-            const envLoader = new THREE.CubeTextureLoader();
-            envLoader.setPath('assets/HDRI/'); // Percorso cartella
-            
-            // Caricamento asincrono per evitare blocchi
-            envLoader.load([
-                'px.png', 'nx.png', // destra, sinistra
-                'py.png', 'ny.png', // sopra, sotto
-                'pz.png', 'nz.png'  // fronte, retro
-            ], function(texture) {
-                // Assegna la texture SOLO all'environment (riflessi/luce)
-                mainModelData.scene.environment = texture;
-                
-                // Opzionale: Se vuoi che i riflessi siano un po' sfocati globalmente (utile per non distrarre)
-                // texture.mapping = THREE.CubeRefractionMapping; 
-                
-                // NOTA: Non settiamo mainModelData.scene.background = texture, 
-                // così lo sfondo rimane nero/trasparente.
-            });
-
-            // Lights (Mantienile come luci di riempimento/accento)
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Riduciamo un po' perché l'HDRI illumina già
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             mainModelData.scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5); // Aumentata intensità per contrasto
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2);
             directionalLight.position.set(5, 5, 5);
             directionalLight.castShadow = true;
-            directionalLight.shadow.bias = -0.0001;
+            directionalLight.shadow.bias = -0.0001; // Fix per shadow acne
             directionalLight.shadow.mapSize.width = 2048;
             directionalLight.shadow.mapSize.height = 2048;
             mainModelData.scene.add(directionalLight);
             
+            // Luce d'accento fredda invece che gialla
             const pointLight = new THREE.PointLight(0xe0e0e0, 1, 10);
             pointLight.position.set(-3, 3, 3);
             mainModelData.scene.add(pointLight);
@@ -1056,12 +1031,10 @@ function initMainModel() {
                         if (child.isMesh) {
                             child.castShadow = true;
                             child.receiveShadow = true;
-                            
+                            // Material override per look più pulito
                             if (child.material) {
-                                // Manteniamo roughness/metalness originali del GLB
-                                // ma forziamo l'aggiornamento dell'environment map
-                                child.material.envMapIntensity = 1.5; // Aumenta questo valore per riflessi più forti
-                                child.material.needsUpdate = true;
+                                child.material.metalness = 0.4;
+                                child.material.roughness = 1;
                             }
                         }
                     });
@@ -1110,7 +1083,7 @@ function initMainModel() {
                 if (!mainModelData.model) return;
                 const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
                 const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-                mainModelData.model.rotation.x = Math.PI * 0.1 + mouseY * 0.05;
+                mainModelData.model.rotation.x = Math.PI * 0.1 + mouseY * 0.05; // Movimento ridotto
                 mainModelData.model.rotation.z = mouseX * 0.05;
             });
         }
