@@ -207,14 +207,14 @@
             user-select: none;
         }
 
-        /* Pulsante attivazione Giroscopio */
+        /* Pulsante attivazione Giroscopio - Aggiornato per Toggle */
         .gyro-button {
             position: absolute;
             bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 25px;
+            background: rgba(20, 20, 20, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 30px;
             color: white;
@@ -229,10 +229,11 @@
             gap: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
+            white-space: nowrap;
         }
 
         .gyro-button:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
             transform: translateX(-50%) scale(1.05);
         }
 
@@ -240,6 +241,7 @@
             background: #ffffff;
             color: #000;
             border-color: #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
         
         .section-bg {
@@ -1125,7 +1127,7 @@
             mainModelData.scene.add(mainModelData.model);
         }
 
-        // ==================== THREE.JS: ORANGES SCENE (SEZIONE 3 + GYRO) ====================
+        // ==================== THREE.JS: ORANGES SCENE (ARANCE + GRAVITÀ INVERTITA + TOGGLE) ====================
         let orangesData = { scene: null, camera: null, renderer: null, oranges: [] };
         let isOrangesInitialized = false;
 
@@ -1144,7 +1146,7 @@
                 count: { mobile: 35, desktop: 80 },
                 mouseRadius: { mobile: 0.25, desktop: 0.25 },
                 fleeForce: 0.05,
-                baseGravity: 0.0015,
+                baseGravity: 0.0015, // Gravità standard per quando il gyro è spento
                 friction: 0.98,
                 returnSpeed: 0.05,
                 gyroSensitivity: 0.003
@@ -1152,46 +1154,69 @@
 
             const isMobile = window.innerWidth < 768;
 
-            // Gestione Pulsante Giroscopio
+            // --- GESTIONE PULSANTE TOGGLE ---
             if (isMobile) {
                 gyroBtn.style.display = 'flex';
                 
-                gyroBtn.addEventListener('click', function() {
-                    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                        DeviceOrientationEvent.requestPermission()
-                            .then(response => {
-                                if (response === 'granted') {
-                                    enableGyro();
-                                } else {
-                                    alert("Permesso negato. Le arance non rotoleranno!");
-                                }
-                            })
-                            .catch(console.error);
+                gyroBtn.onclick = function() {
+                    if (!gyroEnabled) {
+                        // ACCENSIONE
+                        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                            // iOS 13+ richiede permesso esplicito
+                            DeviceOrientationEvent.requestPermission()
+                                .then(response => {
+                                    if (response === 'granted') {
+                                        toggleGyro(true);
+                                    } else {
+                                        alert("Permesso negato.");
+                                    }
+                                })
+                                .catch(console.error);
+                        } else {
+                            // Android o vecchi iOS
+                            toggleGyro(true);
+                        }
                     } else {
-                        enableGyro();
+                        // SPEGNIMENTO
+                        toggleGyro(false);
                     }
-                });
+                };
             }
 
-            function enableGyro() {
-                gyroEnabled = true;
-                gyroBtn.classList.add('active');
-                gyroBtn.innerHTML = '<i class="fas fa-check"></i> Gravità Attiva';
-                
-                window.addEventListener('deviceorientation', (event) => {
-                    let x = event.gamma || 0; 
-                    let y = event.beta || 0;
+            function toggleGyro(active) {
+                gyroEnabled = active;
+                if (active) {
+                    gyroBtn.classList.add('active');
+                    gyroBtn.innerHTML = '<i class="fas fa-toggle-on"></i> Gravità ON';
+                    window.addEventListener('deviceorientation', handleOrientation);
+                } else {
+                    gyroBtn.classList.remove('active');
+                    gyroBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> Attiva Gravità';
+                    window.removeEventListener('deviceorientation', handleOrientation);
+                    // Resettiamo l'orientamento
+                    orientation = { x: 0, y: 0 };
+                }
+            }
 
-                    if (x > 90) x = 90; if (x < -90) x = -90;
-                    if (y > 90) y = 90; if (y < -90) y = -90;
+            // Funzione calcolo orientamento
+            function handleOrientation(event) {
+                let x = event.gamma || 0;  // Inclinazione laterale
+                let y = event.beta || 0;   // Inclinazione avanti/indietro
 
-                    orientation.x = x * config.gyroSensitivity; 
-                    orientation.y = (y - 45) * config.gyroSensitivity; 
-                });
+                // Limiti per evitare velocità eccessive
+                if (x > 90) x = 90; if (x < -90) x = -90;
+                if (y > 90) y = 90; if (y < -90) y = -90;
+
+                // Calcolo vettori
+                orientation.x = x * config.gyroSensitivity; 
                 
-                setTimeout(() => { gyroBtn.style.opacity = '0.5'; }, 2000);
+                // FIX GRAVITÀ: Invertiamo il segno per far cadere le arance verso il basso in verticale
+                // Se il telefono è verticale (y=90), (90-45)=45. Con il meno diventa -45.
+                // -45 corrisponde a una spinta verso il basso (asse Y negativo).
+                orientation.y = -(y - 45) * config.gyroSensitivity; 
             }
             
+            // --- SETUP SCENA THREE.JS ---
             orangesData.scene = new THREE.Scene();
             orangesData.scene.background = new THREE.Color(config.bgColor);
             
@@ -1279,6 +1304,7 @@
                 }
             }
             
+            // Mouse Interaction
             const mouse = new THREE.Vector2(-1000, -1000);
             const raycaster = new THREE.Raycaster();
             const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
@@ -1310,12 +1336,15 @@
                     const data = orange.userData;
 
                     if (gyroEnabled) {
+                        // Modalità GIROSCOPIO ATTIVO
                         data.velocity.x += orientation.x;
                         data.velocity.y += orientation.y;
                     } else {
+                        // Modalità NORMALE (Gyro spento): Gravità verso il basso costante
                         data.velocity.y -= config.baseGravity;
                     }
                     
+                    // Repulsione Mouse/Touch (Sempre attiva)
                     const dx = orange.position.x - mouse3D.x;
                     const dy = orange.position.y - mouse3D.y;
                     const dist = Math.sqrt(dx*dx + dy*dy);
