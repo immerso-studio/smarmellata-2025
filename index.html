@@ -965,14 +965,14 @@
         let mainModelData = { scene: null, camera: null, renderer: null, model: null, mixer: null };
         let isMainModelInitialized = false;
         
-        function initMainModel() {
+function initMainModel() {
             if (isMainModelInitialized) return;
             
             const container = document.getElementById('model-container');
             
             // Scene setup
             mainModelData.scene = new THREE.Scene();
-            // Nebbia scura per fondere il modello con il background
+            // Nebbia scura per fondere il modello con il background (Resta invariata)
             mainModelData.scene.fog = new THREE.Fog(0x0a0a0a, 10, 30);
             
             const width = container.clientWidth;
@@ -981,7 +981,7 @@
             mainModelData.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
             mainModelData.camera.position.set(0, 1, 5);
             
-            // FIX RENDER: logarithmicDepthBuffer per evitare linee di z-fighting
+            // --- MODIFICA RENDERER PER PBR ---
             mainModelData.renderer = new THREE.WebGLRenderer({ 
                 alpha: true, 
                 antialias: true,
@@ -991,23 +991,48 @@
             mainModelData.renderer.setSize(width, height);
             mainModelData.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             mainModelData.renderer.shadowMap.enabled = true;
-            mainModelData.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Ombre più morbide
+            mainModelData.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            // Impostazioni cruciali per il realismo dei materiali metallici
             mainModelData.renderer.outputEncoding = THREE.sRGBEncoding;
+            mainModelData.renderer.toneMapping = THREE.ACESFilmicToneMapping; // Tone mapping cinematografico
+            mainModelData.renderer.toneMappingExposure = 0.7; // Regola la luminosità globale
+            
             container.appendChild(mainModelData.renderer.domElement);
             
-            // Lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            // --- CARICAMENTO HDRI CUBICO (ENV MAP) ---
+            // Assicurati di avere le 6 immagini in assets/env/
+            const envLoader = new THREE.CubeTextureLoader();
+            envLoader.setPath('assets/HDRI/'); // Percorso cartella
+            
+            // Caricamento asincrono per evitare blocchi
+            envLoader.load([
+                'px.png', 'nx.png', // destra, sinistra
+                'py.png', 'ny.png', // sopra, sotto
+                'pz.png', 'nz.png'  // fronte, retro
+            ], function(texture) {
+                // Assegna la texture SOLO all'environment (riflessi/luce)
+                mainModelData.scene.environment = texture;
+                
+                // Opzionale: Se vuoi che i riflessi siano un po' sfocati globalmente (utile per non distrarre)
+                // texture.mapping = THREE.CubeRefractionMapping; 
+                
+                // NOTA: Non settiamo mainModelData.scene.background = texture, 
+                // così lo sfondo rimane nero/trasparente.
+            });
+
+            // Lights (Mantienile come luci di riempimento/accento)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Riduciamo un po' perché l'HDRI illumina già
             mainModelData.scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Aumentata intensità per contrasto
             directionalLight.position.set(5, 5, 5);
             directionalLight.castShadow = true;
-            directionalLight.shadow.bias = -0.0001; // Fix per shadow acne
+            directionalLight.shadow.bias = -0.0001;
             directionalLight.shadow.mapSize.width = 2048;
             directionalLight.shadow.mapSize.height = 2048;
             mainModelData.scene.add(directionalLight);
             
-            // Luce d'accento fredda invece che gialla
             const pointLight = new THREE.PointLight(0xe0e0e0, 1, 10);
             pointLight.position.set(-3, 3, 3);
             mainModelData.scene.add(pointLight);
@@ -1028,14 +1053,12 @@
                     mainModelData.model.scale.set(12, 12, 12);
                     
                     mainModelData.model.traverse(function(child) {
-                        if (child.isMesh) {
-                            child.castShadow = true;
-                            child.receiveShadow = true;
-                            // Material override per look più pulito
-                            if (child.material) {
-                                child.material.metalness = 0.4;
-                                child.material.roughness = 0.6;
-                            }
+                        if (child.isMesh && child.material) {
+                            // Aggiunge uno strato lucido extra
+                            child.material.clearcoat = 1.0;       // Intensità strato
+                            child.material.clearcoatRoughness = 1; // Lucentezza strato
+                            
+                            child.material.envMapIntensity = 2.0;
                         }
                     });
                     
@@ -1064,7 +1087,7 @@
                 requestAnimationFrame(animateMain);
                 if (mainModelData.mixer) mainModelData.mixer.update(clock.getDelta());
                 if (mainModelData.model) {
-                    mainModelData.model.rotation.y += 0.005;
+                    mainModelData.model.rotation.y += -0.005;
                     mainModelData.model.position.y = Math.sin(Date.now() * 0.001) * 0.1;
                 }
                 mainModelData.renderer.render(mainModelData.scene, mainModelData.camera);
@@ -1083,7 +1106,7 @@
                 if (!mainModelData.model) return;
                 const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
                 const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-                mainModelData.model.rotation.x = Math.PI * 0.1 + mouseY * 0.05; // Movimento ridotto
+                mainModelData.model.rotation.x = Math.PI * 0.1 + mouseY * 0.05;
                 mainModelData.model.rotation.z = mouseX * 0.05;
             });
         }
@@ -1131,12 +1154,12 @@
             orangesData.renderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(orangesData.renderer.domElement);
             
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             orangesData.scene.add(ambientLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
             dirLight.position.set(5, 10, 7);
             orangesData.scene.add(dirLight);
-            const fillLight = new THREE.PointLight(0xffaa00, 0.5);
+            const fillLight = new THREE.PointLight(0xffaa00, 1);
             fillLight.position.set(-5, -5, 5);
             orangesData.scene.add(fillLight);
             
@@ -1322,9 +1345,9 @@
                 { id: 9, title: "Scostine", ingredients: ["Pollo", "Aromi", "Olio"], instructions: ["Marinare", "Cuocere"] }
             ],
             dolci: [
-                { id: 13, title: "Sandoro", ingredients: ["Pandoro", "Mascarpone", "Cacao"], instructions: ["Tagliare", "Farcire", "Servire"] },
-                { id: 14, title: "Spavlova", ingredients: ["Meringa", "Frutti di bosco", "Panna"], instructions: ["Montare", "Decorare"] },
-                { id: 15, title: "Strudel", ingredients: ["Mele", "Cannella", "Pasta sfoglia"], instructions: ["Arrotolare", "Cuocere in forno"] }
+                { id: 13, title: "Scrostata", ingredients: ["Pandoro", "Mascarpone", "Cacao"], instructions: ["Tagliare", "Farcire", "Servire"] },
+                { id: 14, title: "Smarmellamisu", ingredients: ["Meringa", "Frutti di bosco", "Panna"], instructions: ["Montare", "Decorare"] },
+                { id: 15, title: "Sricotta", ingredients: ["Mele", "Cannella", "Pasta sfoglia"], instructions: ["Arrotolare", "Cuocere in forno"] }
             ],
             drinks: [
                 { id: 10, title: "Scoffee", ingredients: ["Gin", "Vermouth", "Campari"], instructions: ["Mixare", "Servire"] },
