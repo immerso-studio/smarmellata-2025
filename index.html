@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SMARMELLATA 2025 - Regalo Natalizio</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -204,6 +205,41 @@
             text-align: center;
             width: 100%;
             user-select: none;
+        }
+
+        /* Pulsante attivazione Giroscopio */
+        .gyro-button {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            color: white;
+            font-family: 'Inter Tight', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .gyro-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        .gyro-button.active {
+            background: #ffffff;
+            color: #000;
+            border-color: #fff;
         }
         
         .section-bg {
@@ -450,7 +486,6 @@
             overflow: hidden; 
         }
         
-        /* ANIMAZIONE COMPARSA (GSAP-like) */
         @keyframes cardEntrance {
             from {
                 opacity: 0;
@@ -472,7 +507,6 @@
             backdrop-filter: blur(10px);
             min-height: 400px;
             position: relative;
-            /* Stato iniziale per animazione */
             opacity: 0;
             animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
@@ -505,7 +539,6 @@
         .mobile-card.previous { opacity: 0; transform: translateX(-100%); z-index: 1; }
         .mobile-card.next { opacity: 0; transform: translateX(100%); z-index: 1; }
         
-        /* Animazione entrata specifica per mobile */
         @keyframes mobileContentEntrance {
             from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
@@ -535,7 +568,6 @@
         .desktop-card:hover .card-image img,
         .mobile-card:hover .card-image img { transform: scale(1.1); }
         
-        /* Glass Frosted */
         .card-content {
             position: absolute;
             bottom: 0;
@@ -581,21 +613,20 @@
             z-index: 2;
         }
         
-        /* MODIFICA: Navigazione Mobile in basso ai lati del titolo */
         .mobile-nav-buttons {
             position: absolute;
             top: auto;
-            bottom: 0; /* Allineato al fondo */
+            bottom: 0; 
             left: 0;
             right: 0;
-            height: 123px; /* Altezza uguale a min-height di card-content per centrare con il titolo */
+            height: 123px; 
             transform: none;
             display: flex;
             justify-content: space-between;
-            align-items: center; /* Centratura verticale rispetto al titolo */
+            align-items: center; 
             padding: 0 20px;
-            z-index: 20; /* Sopra al contenuto card */
-            pointer-events: none; /* Lascia cliccare attraverso lo spazio vuoto */
+            z-index: 20; 
+            pointer-events: none; 
         }
         
         .mobile-nav-button {
@@ -620,9 +651,8 @@
             transform: scale(1.1);
         }
         
-        /* MODIFICA: Cards Dots nascosti su Desktop */
         .cards-dots {
-            display: none; /* Nascosti di default */
+            display: none; 
             justify-content: center;
             gap: 10px;
             margin-top: 25px;
@@ -843,7 +873,7 @@
         }
         
         @media (max-width: 576px) {
-            .main-title { font-size: 3.5rem; }
+            .main-title { font-size: 3rem; }
             .section-title { font-size: 2.2rem; }
             .logo-fixed { width: 40px; top: 15px; left: 15px; }
             .year-badge { top: -40px; right: -25px; }
@@ -939,6 +969,11 @@
         
         <section id="section3" class="fullscreen-section">
             <div class="oranges-overlay-text">è natale, non il carnevale di Ivrea</div>
+            
+            <div id="gyro-btn" class="gyro-button" style="display:none;">
+                <i class="fas fa-mobile-alt"></i> Attiva Gravità
+            </div>
+
             <div id="oranges-canvas-container"></div>
             
             <div class="scroll-arrow" onclick="scrollToSection(1)" style="color: rgba(255,255,255,0.5);">
@@ -971,7 +1006,6 @@
             
             // Scene setup
             mainModelData.scene = new THREE.Scene();
-            // Nebbia scura per fondere il modello con il background
             mainModelData.scene.fog = new THREE.Fog(0x0a0a0a, 10, 30);
             
             const width = container.clientWidth;
@@ -980,7 +1014,6 @@
             mainModelData.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
             mainModelData.camera.position.set(0, 0.7, 5);
             
-            // FIX RENDER: logarithmicDepthBuffer per evitare linee di z-fighting
             mainModelData.renderer = new THREE.WebGLRenderer({ 
                 alpha: true, 
                 antialias: true,
@@ -990,7 +1023,7 @@
             mainModelData.renderer.setSize(width, height);
             mainModelData.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             mainModelData.renderer.shadowMap.enabled = true;
-            mainModelData.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Ombre più morbide
+            mainModelData.renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
             mainModelData.renderer.outputEncoding = THREE.sRGBEncoding;
             container.appendChild(mainModelData.renderer.domElement);
             
@@ -1001,12 +1034,11 @@
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2);
             directionalLight.position.set(5, 5, 5);
             directionalLight.castShadow = true;
-            directionalLight.shadow.bias = -0.0001; // Fix per shadow acne
+            directionalLight.shadow.bias = -0.0001;
             directionalLight.shadow.mapSize.width = 2048;
             directionalLight.shadow.mapSize.height = 2048;
             mainModelData.scene.add(directionalLight);
             
-            // Luce d'accento fredda invece che gialla
             const pointLight = new THREE.PointLight(0xe0e0e0, 1, 10);
             pointLight.position.set(-3, 3, 3);
             mainModelData.scene.add(pointLight);
@@ -1030,7 +1062,6 @@
                         if (child.isMesh) {
                             child.castShadow = true;
                             child.receiveShadow = true;
-                            // Material override per look più pulito
                             if (child.material) {
                                 child.material.metalness = 0.4;
                                 child.material.roughness = 1;
@@ -1082,7 +1113,7 @@
                 if (!mainModelData.model) return;
                 const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
                 const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-                mainModelData.model.rotation.x = Math.PI * 0.1 + mouseY * 0.05; // Movimento ridotto
+                mainModelData.model.rotation.x = Math.PI * 0.1 + mouseY * 0.05;
                 mainModelData.model.rotation.z = mouseX * 0.05;
             });
         }
@@ -1094,25 +1125,72 @@
             mainModelData.scene.add(mainModelData.model);
         }
 
-        // ==================== THREE.JS: ORANGES SCENE (SEZIONE 3) ====================
+        // ==================== THREE.JS: ORANGES SCENE (SEZIONE 3 + GYRO) ====================
         let orangesData = { scene: null, camera: null, renderer: null, oranges: [] };
         let isOrangesInitialized = false;
+
+        // Variabili per il giroscopio
+        let gyroEnabled = false;
+        let orientation = { x: 0, y: 0 }; 
 
         function initOrangesScene() {
             if (isOrangesInitialized) return;
 
             const container = document.getElementById('oranges-canvas-container');
+            const gyroBtn = document.getElementById('gyro-btn');
+
             const config = {
                 bgColor: 0x111111,
-                count: { mobile: 40, desktop: 80 },
+                count: { mobile: 35, desktop: 80 },
                 mouseRadius: { mobile: 0.25, desktop: 0.25 },
                 fleeForce: 0.05,
-                gravity: 0.0015,
+                baseGravity: 0.0015,
                 friction: 0.98,
-                returnSpeed: 0.05
+                returnSpeed: 0.05,
+                gyroSensitivity: 0.003
             };
 
             const isMobile = window.innerWidth < 768;
+
+            // Gestione Pulsante Giroscopio
+            if (isMobile) {
+                gyroBtn.style.display = 'flex';
+                
+                gyroBtn.addEventListener('click', function() {
+                    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                        DeviceOrientationEvent.requestPermission()
+                            .then(response => {
+                                if (response === 'granted') {
+                                    enableGyro();
+                                } else {
+                                    alert("Permesso negato. Le arance non rotoleranno!");
+                                }
+                            })
+                            .catch(console.error);
+                    } else {
+                        enableGyro();
+                    }
+                });
+            }
+
+            function enableGyro() {
+                gyroEnabled = true;
+                gyroBtn.classList.add('active');
+                gyroBtn.innerHTML = '<i class="fas fa-check"></i> Gravità Attiva';
+                
+                window.addEventListener('deviceorientation', (event) => {
+                    let x = event.gamma || 0; 
+                    let y = event.beta || 0;
+
+                    if (x > 90) x = 90; if (x < -90) x = -90;
+                    if (y > 90) y = 90; if (y < -90) y = -90;
+
+                    orientation.x = x * config.gyroSensitivity; 
+                    orientation.y = (y - 45) * config.gyroSensitivity; 
+                });
+                
+                setTimeout(() => { gyroBtn.style.opacity = '0.5'; }, 2000);
+            }
             
             orangesData.scene = new THREE.Scene();
             orangesData.scene.background = new THREE.Color(config.bgColor);
@@ -1220,6 +1298,7 @@
             document.addEventListener('touchmove', e => {
                 if(e.touches.length > 0) updateMouse(e.touches[0].clientX, e.touches[0].clientY);
             }, {passive: false});
+            document.addEventListener('touchend', () => { mouse.set(-1000, -1000); mouse3D.set(-1000, -1000, 0); });
             
             function animateOranges() {
                 requestAnimationFrame(animateOranges);
@@ -1229,7 +1308,13 @@
                 
                 orangesData.oranges.forEach(orange => {
                     const data = orange.userData;
-                    data.velocity.y -= config.gravity;
+
+                    if (gyroEnabled) {
+                        data.velocity.x += orientation.x;
+                        data.velocity.y += orientation.y;
+                    } else {
+                        data.velocity.y -= config.baseGravity;
+                    }
                     
                     const dx = orange.position.x - mouse3D.x;
                     const dy = orange.position.y - mouse3D.y;
@@ -1258,7 +1343,6 @@
                     orange.rotation.y += data.rotSpeed.y - data.velocity.x * 0.2;
                 });
                 
-                // Collisioni semplificate
                 for (let i = 0; i < orangesData.oranges.length; i++) {
                     for (let j = i + 1; j < orangesData.oranges.length; j++) {
                         const o1 = orangesData.oranges[i];
@@ -1278,7 +1362,7 @@
                             const dvy = o1.userData.velocity.y - o2.userData.velocity.y;
                             const velNormal = dvx*nx + dvy*ny;
                             if(velNormal < 0) {
-                                const j = -(1.6) * velNormal / 2;
+                                const j = -(1.5) * velNormal / 2;
                                 o1.userData.velocity.x += j*nx; o1.userData.velocity.y += j*ny;
                                 o2.userData.velocity.x -= j*nx; o2.userData.velocity.y -= j*ny;
                             }
@@ -1334,7 +1418,6 @@
 
         function getImagePath(category, index) {
             let prefix = '';
-            // Mappa precisa tra categoria (codice) e prefisso file (reale)
             switch(category) {
                 case 'antipasti': prefix = 'Antipasto'; break;
                 case 'primi': prefix = 'Primo'; break;
@@ -1343,8 +1426,6 @@
                 case 'drinks': prefix = 'Drink'; break;
                 default: prefix = 'Antipasto';
             }
-            
-            // Costruisce il percorso: assets/IMG/RICETTE/NomeFile 01.webp
             return `assets/IMG/RICETTE/${prefix} ${(index + 1).toString().padStart(2, '0')}.webp`;
         }
 
@@ -1375,9 +1456,7 @@
                     // Desktop
                     const dCard = document.createElement('div');
                     dCard.className = 'desktop-card';
-                    // Delay animazione per effetto GSAP stagger
                     dCard.style.animationDelay = `${idx * 0.15}s`;
-                    
                     dCard.innerHTML = `<div class="card-image"><img src="${img}" onerror="this.src='https://via.placeholder.com/400x600/222/fff?text=${card.title}'"></div><div class="card-content"><h3 class="card-title">${card.title}</h3></div>`;
                     dCard.onclick = () => openRecipeModal(cat, idx);
                     desktopCards.appendChild(dCard);
@@ -1399,17 +1478,16 @@
                 bindMobileEvents();
             }
 
-            // MODIFICA: Logica loop infinito
             function bindMobileEvents() {
                 document.getElementById('mobilePrevButton').onclick = () => {
                     let newIndex = currentMobileCardIndex - 1;
-                    if (newIndex < 0) newIndex = totalCards - 1; // Loop al fondo
+                    if (newIndex < 0) newIndex = totalCards - 1; 
                     updateMobileView(newIndex);
                 };
                 
                 document.getElementById('mobileNextButton').onclick = () => {
                     let newIndex = currentMobileCardIndex + 1;
-                    if (newIndex >= totalCards) newIndex = 0; // Loop all'inizio
+                    if (newIndex >= totalCards) newIndex = 0; 
                     updateMobileView(newIndex);
                 };
             }
@@ -1423,8 +1501,6 @@
                 });
                 const dots = document.querySelectorAll('.card-dot');
                 dots.forEach((d, i) => d.classList.toggle('active', i===index));
-                
-                // Rimossa logica disabled button per loop infinito
             }
 
             categoryTabs.forEach(tab => {
