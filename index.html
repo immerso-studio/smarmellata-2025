@@ -1025,7 +1025,7 @@ function initMainModel() {
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Riduciamo un po' perché l'HDRI illumina già
             mainModelData.scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Aumentata intensità per contrasto
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5); // Aumentata intensità per contrasto
             directionalLight.position.set(5, 5, 5);
             directionalLight.castShadow = true;
             directionalLight.shadow.bias = -0.0001;
@@ -1053,12 +1053,16 @@ function initMainModel() {
                     mainModelData.model.scale.set(12, 12, 12);
                     
                     mainModelData.model.traverse(function(child) {
-                        if (child.isMesh && child.material) {
-                            // Aggiunge uno strato lucido extra
-                            child.material.clearcoat = 1.0;       // Intensità strato
-                            child.material.clearcoatRoughness = 1; // Lucentezza strato
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
                             
-                            child.material.envMapIntensity = 2.0;
+                            if (child.material) {
+                                // Manteniamo roughness/metalness originali del GLB
+                                // ma forziamo l'aggiornamento dell'environment map
+                                child.material.envMapIntensity = 1.5; // Aumenta questo valore per riflessi più forti
+                                child.material.needsUpdate = true;
+                            }
                         }
                     });
                     
@@ -1087,7 +1091,7 @@ function initMainModel() {
                 requestAnimationFrame(animateMain);
                 if (mainModelData.mixer) mainModelData.mixer.update(clock.getDelta());
                 if (mainModelData.model) {
-                    mainModelData.model.rotation.y += -0.005;
+                    mainModelData.model.rotation.y += 0.005;
                     mainModelData.model.position.y = Math.sin(Date.now() * 0.001) * 0.1;
                 }
                 mainModelData.renderer.render(mainModelData.scene, mainModelData.camera);
@@ -1154,12 +1158,12 @@ function initMainModel() {
             orangesData.renderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(orangesData.renderer.domElement);
             
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             orangesData.scene.add(ambientLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
             dirLight.position.set(5, 10, 7);
             orangesData.scene.add(dirLight);
-            const fillLight = new THREE.PointLight(0xffaa00, 1);
+            const fillLight = new THREE.PointLight(0xffaa00, 0.5);
             fillLight.position.set(-5, -5, 5);
             orangesData.scene.add(fillLight);
             
@@ -1345,9 +1349,9 @@ function initMainModel() {
                 { id: 9, title: "Scostine", ingredients: ["Pollo", "Aromi", "Olio"], instructions: ["Marinare", "Cuocere"] }
             ],
             dolci: [
-                { id: 13, title: "Scrostata", ingredients: ["Pandoro", "Mascarpone", "Cacao"], instructions: ["Tagliare", "Farcire", "Servire"] },
-                { id: 14, title: "Smarmellamisu", ingredients: ["Meringa", "Frutti di bosco", "Panna"], instructions: ["Montare", "Decorare"] },
-                { id: 15, title: "Sricotta", ingredients: ["Mele", "Cannella", "Pasta sfoglia"], instructions: ["Arrotolare", "Cuocere in forno"] }
+                { id: 13, title: "Sandoro", ingredients: ["Pandoro", "Mascarpone", "Cacao"], instructions: ["Tagliare", "Farcire", "Servire"] },
+                { id: 14, title: "Spavlova", ingredients: ["Meringa", "Frutti di bosco", "Panna"], instructions: ["Montare", "Decorare"] },
+                { id: 15, title: "Strudel", ingredients: ["Mele", "Cannella", "Pasta sfoglia"], instructions: ["Arrotolare", "Cuocere in forno"] }
             ],
             drinks: [
                 { id: 10, title: "Scoffee", ingredients: ["Gin", "Vermouth", "Campari"], instructions: ["Mixare", "Servire"] },
