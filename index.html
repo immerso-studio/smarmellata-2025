@@ -12,6 +12,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
 
     <style>
         @font-face {
@@ -165,7 +166,7 @@
             z-index: 1;
             pointer-events: none;
             overflow: hidden;
-            opacity: 0.8;
+            opacity: 1; 
         }
         
         /* Sezione 2 */
@@ -997,7 +998,7 @@
     </div>
     
     <script>
-        // ==================== THREE.JS: MAIN HERO (BARATTOLO) ====================
+        // ==================== THREE.JS: MAIN HERO (BARATTOLO) - AGGIORNATO ====================
         let mainModelData = { scene: null, camera: null, renderer: null, model: null, mixer: null };
         let isMainModelInitialized = false;
         
@@ -1005,10 +1006,11 @@
             if (isMainModelInitialized) return;
             
             const container = document.getElementById('model-container');
+            const isMobile = window.innerWidth < 768; // Rilevamento Mobile
             
             // Scene setup
             mainModelData.scene = new THREE.Scene();
-            mainModelData.scene.fog = new THREE.Fog(0x0a0a0a, 10, 30);
+            mainModelData.scene.fog = new THREE.Fog(0x0a0a0a, 10, 40);
             
             const width = container.clientWidth;
             const height = container.clientHeight;
@@ -1019,33 +1021,40 @@
             mainModelData.renderer = new THREE.WebGLRenderer({ 
                 alpha: true, 
                 antialias: true,
-                logarithmicDepthBuffer: true,
                 powerPreference: "high-performance"
             });
             mainModelData.renderer.setSize(width, height);
             mainModelData.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            
+            mainModelData.renderer.physicallyCorrectLights = true; 
+            mainModelData.renderer.outputEncoding = THREE.sRGBEncoding;
+            mainModelData.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            mainModelData.renderer.toneMappingExposure = 1.0;
+            
             mainModelData.renderer.shadowMap.enabled = true;
             mainModelData.renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
-            mainModelData.renderer.outputEncoding = THREE.sRGBEncoding;
             container.appendChild(mainModelData.renderer.domElement);
             
-            // Lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            const pmremGenerator = new THREE.PMREMGenerator(mainModelData.renderer);
+            pmremGenerator.compileEquirectangularShader();
+            const environment = new THREE.RoomEnvironment();
+            mainModelData.scene.environment = pmremGenerator.fromScene(environment).texture;
+            
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
             mainModelData.scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 2); 
             directionalLight.position.set(5, 5, 5);
             directionalLight.castShadow = true;
             directionalLight.shadow.bias = -0.0001;
-            directionalLight.shadow.mapSize.width = 2048;
-            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
             mainModelData.scene.add(directionalLight);
             
-            const pointLight = new THREE.PointLight(0xe0e0e0, 1, 10);
-            pointLight.position.set(-3, 3, 3);
+            const pointLight = new THREE.PointLight(0x88ccff, 2, 10);
+            pointLight.position.set(-3, 2, -3);
             mainModelData.scene.add(pointLight);
 
-            // Loading message
             const loadingElement = document.createElement('div');
             loadingElement.className = 'model-loading';
             loadingElement.textContent = 'Caricamento modello...';
@@ -1053,21 +1062,17 @@
             
             const loader = new THREE.GLTFLoader();
             loader.load(
-                'assets/Smarmellata1.glb',
+                'assets/Smarmellata.glb',
                 function(gltf) {
                     mainModelData.model = gltf.scene;
                     mainModelData.scene.add(mainModelData.model);
                     mainModelData.model.position.set(0, 0, 0);
-                    mainModelData.model.scale.set(12, 12, 12);
+                    mainModelData.model.scale.set(10, 10, 10);
                     
                     mainModelData.model.traverse(function(child) {
                         if (child.isMesh) {
                             child.castShadow = true;
                             child.receiveShadow = true;
-                            if (child.material) {
-                                child.material.metalness = 0.4;
-                                child.material.roughness = 1;
-                            }
                         }
                     });
                     
@@ -1091,13 +1096,74 @@
             
             isMainModelInitialized = true;
             
+            // Variabili per l'orientamento
+            let targetRotationX = 0;
+            let targetRotationZ = 0;
+
+            // Se siamo su mobile, usiamo il giroscopio invece del tocco
+            if (isMobile) {
+                window.addEventListener('deviceorientation', (event) => {
+                    // Ottieni inclinazione (limitata per sicurezza)
+                    let y = event.beta || 0; // Front/Back tilt (-180 to 180)
+                    let x = event.gamma || 0; // Left/Right tilt (-90 to 90)
+                    
+                    // Clamping per evitare rotazioni estreme
+                    if (x > 45) x = 45; if (x < -45) x = -45;
+                    if (y > 90) y = 90; if (y < -90) y = -90;
+
+                    // Calcola target rotation (molto lieve)
+                    // Sottraiamo 45 da beta perché di solito si tiene il telefono inclinato a 45 gradi
+                    targetRotationX = (y - 45) * 0.02; 
+                    targetRotationZ = x * 0.02;
+                });
+            } else {
+                // Desktop: Mouse Interaction
+                document.addEventListener('mousemove', function(event) {
+                    if (!mainModelData.model) return;
+                    const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                    const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+                    
+                    targetRotationX = Math.PI * 0.1 + mouseY * 0.05;
+                    targetRotationZ = mouseX * 0.05;
+                });
+            }
+            
             const clock = new THREE.Clock();
             function animateMain() {
                 requestAnimationFrame(animateMain);
-                if (mainModelData.mixer) mainModelData.mixer.update(clock.getDelta());
+                
+                const delta = clock.getDelta();
+                if (mainModelData.mixer) mainModelData.mixer.update(delta);
+                
                 if (mainModelData.model) {
-                    mainModelData.model.rotation.y += 0.005;
-                    mainModelData.model.position.y = Math.sin(Date.now() * 0.001) * 0.1;
+                    // Rotazione automatica di base
+                    mainModelData.model.rotation.y += -0.005;
+                    // Movimento flottante
+                    mainModelData.model.position.y = Math.sin(clock.getElapsedTime()) * 0.1;
+                    
+                    // Applicazione rotazione interattiva (Mouse o Giroscopio) con Lerp per fluidità
+                    // Se siamo su desktop, targetRotationX viene aggiornato dal mouse
+                    // Se siamo su mobile, viene aggiornato dal deviceorientation
+                    // La logica di applicazione è la stessa per entrambi, cambia solo la sorgente
+                    
+                    // Su desktop, la base era Math.PI * 0.1 + mouseY...
+                    // Su mobile è un offset da 0.
+                    // Quindi dobbiamo gestire i due casi leggermente diversi nell'interpolazione
+                    
+                    if (isMobile) {
+                        // Su mobile aggiungiamo l'inclinazione alla rotazione base (un po' inclinata verso l'utente)
+                         const baseMobileTilt = Math.PI * 0.1;
+                         mainModelData.model.rotation.x = THREE.MathUtils.lerp(mainModelData.model.rotation.x, baseMobileTilt + targetRotationX, 0.1);
+                         mainModelData.model.rotation.z = THREE.MathUtils.lerp(mainModelData.model.rotation.z, targetRotationZ, 0.1);
+                    } else {
+                        // Su desktop usiamo i valori calcolati direttamente dal mousemove che includono già l'offset
+                        // Se targetRotationX è 0 (mouse non ancora mosso), usiamo un default
+                        const targetX = targetRotationX !== 0 ? targetRotationX : Math.PI * 0.1;
+                        const targetZ = targetRotationZ;
+                        
+                        mainModelData.model.rotation.x = THREE.MathUtils.lerp(mainModelData.model.rotation.x, targetX, 0.1);
+                        mainModelData.model.rotation.z = THREE.MathUtils.lerp(mainModelData.model.rotation.z, targetZ, 0.1);
+                    }
                 }
                 mainModelData.renderer.render(mainModelData.scene, mainModelData.camera);
             }
@@ -1109,14 +1175,6 @@
                 mainModelData.camera.aspect = w / h;
                 mainModelData.camera.updateProjectionMatrix();
                 mainModelData.renderer.setSize(w, h);
-            });
-            
-            document.addEventListener('mousemove', function(event) {
-                if (!mainModelData.model) return;
-                const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-                const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-                mainModelData.model.rotation.x = Math.PI * 0.1 + mouseY * 0.05;
-                mainModelData.model.rotation.z = mouseX * 0.05;
             });
         }
 
@@ -1131,7 +1189,6 @@
         let orangesData = { scene: null, camera: null, renderer: null, oranges: [] };
         let isOrangesInitialized = false;
 
-        // Variabili per il giroscopio
         let gyroEnabled = false;
         let orientation = { x: 0, y: 0 }; 
 
@@ -1146,7 +1203,7 @@
                 count: { mobile: 35, desktop: 80 },
                 mouseRadius: { mobile: 0.25, desktop: 0.25 },
                 fleeForce: 0.05,
-                baseGravity: 0.0015, // Gravità standard per quando il gyro è spento
+                baseGravity: 0.0015, 
                 friction: 0.98,
                 returnSpeed: 0.05,
                 gyroSensitivity: 0.003
@@ -1154,15 +1211,12 @@
 
             const isMobile = window.innerWidth < 768;
 
-            // --- GESTIONE PULSANTE TOGGLE ---
             if (isMobile) {
                 gyroBtn.style.display = 'flex';
                 
                 gyroBtn.onclick = function() {
                     if (!gyroEnabled) {
-                        // ACCENSIONE
                         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                            // iOS 13+ richiede permesso esplicito
                             DeviceOrientationEvent.requestPermission()
                                 .then(response => {
                                     if (response === 'granted') {
@@ -1173,11 +1227,9 @@
                                 })
                                 .catch(console.error);
                         } else {
-                            // Android o vecchi iOS
                             toggleGyro(true);
                         }
                     } else {
-                        // SPEGNIMENTO
                         toggleGyro(false);
                     }
                 };
@@ -1193,30 +1245,21 @@
                     gyroBtn.classList.remove('active');
                     gyroBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> Attiva Gravità';
                     window.removeEventListener('deviceorientation', handleOrientation);
-                    // Resettiamo l'orientamento
                     orientation = { x: 0, y: 0 };
                 }
             }
 
-            // Funzione calcolo orientamento
             function handleOrientation(event) {
-                let x = event.gamma || 0;  // Inclinazione laterale
-                let y = event.beta || 0;   // Inclinazione avanti/indietro
+                let x = event.gamma || 0; 
+                let y = event.beta || 0; 
 
-                // Limiti per evitare velocità eccessive
                 if (x > 90) x = 90; if (x < -90) x = -90;
                 if (y > 90) y = 90; if (y < -90) y = -90;
 
-                // Calcolo vettori
                 orientation.x = x * config.gyroSensitivity; 
-                
-                // FIX GRAVITÀ: Invertiamo il segno per far cadere le arance verso il basso in verticale
-                // Se il telefono è verticale (y=90), (90-45)=45. Con il meno diventa -45.
-                // -45 corrisponde a una spinta verso il basso (asse Y negativo).
                 orientation.y = -(y - 45) * config.gyroSensitivity; 
             }
             
-            // --- SETUP SCENA THREE.JS ---
             orangesData.scene = new THREE.Scene();
             orangesData.scene.background = new THREE.Color(config.bgColor);
             
@@ -1304,7 +1347,6 @@
                 }
             }
             
-            // Mouse Interaction
             const mouse = new THREE.Vector2(-1000, -1000);
             const raycaster = new THREE.Raycaster();
             const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
@@ -1336,15 +1378,12 @@
                     const data = orange.userData;
 
                     if (gyroEnabled) {
-                        // Modalità GIROSCOPIO ATTIVO
                         data.velocity.x += orientation.x;
                         data.velocity.y += orientation.y;
                     } else {
-                        // Modalità NORMALE (Gyro spento): Gravità verso il basso costante
                         data.velocity.y -= config.baseGravity;
                     }
                     
-                    // Repulsione Mouse/Touch (Sempre attiva)
                     const dx = orange.position.x - mouse3D.x;
                     const dy = orange.position.y - mouse3D.y;
                     const dist = Math.sqrt(dx*dx + dy*dy);
@@ -1434,9 +1473,9 @@
                 { id: 9, title: "Scostine", ingredients: ["Pollo", "Aromi", "Olio"], instructions: ["Marinare", "Cuocere"] }
             ],
             dolci: [
-                { id: 13, title: "Sandoro", ingredients: ["Pandoro", "Mascarpone", "Cacao"], instructions: ["Tagliare", "Farcire", "Servire"] },
-                { id: 14, title: "Spavlova", ingredients: ["Meringa", "Frutti di bosco", "Panna"], instructions: ["Montare", "Decorare"] },
-                { id: 15, title: "Strudel", ingredients: ["Mele", "Cannella", "Pasta sfoglia"], instructions: ["Arrotolare", "Cuocere in forno"] }
+                { id: 13, title: "Scrostata", ingredients: ["Pandoro", "Mascarpone", "Cacao"], instructions: ["Tagliare", "Farcire", "Servire"] },
+                { id: 14, title: "Smarmellamisu", ingredients: ["Meringa", "Frutti di bosco", "Panna"], instructions: ["Montare", "Decorare"] },
+                { id: 15, title: "Sricotta", ingredients: ["Mele", "Cannella", "Pasta sfoglia"], instructions: ["Arrotolare", "Cuocere in forno"] }
             ],
             drinks: [
                 { id: 10, title: "Scoffee", ingredients: ["Gin", "Vermouth", "Campari"], instructions: ["Mixare", "Servire"] },
