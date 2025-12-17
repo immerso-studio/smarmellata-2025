@@ -204,7 +204,7 @@
             letter-spacing: 4px;
             z-index: 10;
             text-align: center;
-            width: 100%;
+            width: 50%;
             user-select: none;
         }
 
@@ -340,7 +340,7 @@
             font-family: 'Inter Tight', sans-serif;
         }
         
-        .nav-dot:hover .nav-label { opacity: 1; }
+        .nav-dot:hover .nav-label { opacity: 0; }
         
         /* Logo Fisso */
         .logo-fixed {
@@ -1040,10 +1040,10 @@
             const environment = new THREE.RoomEnvironment();
             mainModelData.scene.environment = pmremGenerator.fromScene(environment).texture;
             
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1);
             mainModelData.scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 2); 
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1); 
             directionalLight.position.set(5, 5, 5);
             directionalLight.castShadow = true;
             directionalLight.shadow.bias = -0.0001;
@@ -1051,8 +1051,8 @@
             directionalLight.shadow.mapSize.height = 1024;
             mainModelData.scene.add(directionalLight);
             
-            const pointLight = new THREE.PointLight(0x88ccff, 2, 10);
-            pointLight.position.set(-3, 2, -3);
+            const pointLight = new THREE.PointLight(0x88ccff, 20, 20);
+            pointLight.position.set(-7, 0, 0);
             mainModelData.scene.add(pointLight);
 
             const loadingElement = document.createElement('div');
@@ -1061,18 +1061,25 @@
             container.appendChild(loadingElement);
             
             const loader = new THREE.GLTFLoader();
+            // Aggiunto Cache Buster ?v=...
             loader.load(
-                'assets/Smarmellata.glb',
+                'assets/Smarmellata.glb?v=' + new Date().getTime(),
                 function(gltf) {
                     mainModelData.model = gltf.scene;
                     mainModelData.scene.add(mainModelData.model);
                     mainModelData.model.position.set(0, 0, 0);
-                    mainModelData.model.scale.set(10, 10, 10);
+                    mainModelData.model.scale.set(9, 9, 9);
                     
                     mainModelData.model.traverse(function(child) {
                         if (child.isMesh) {
                             child.castShadow = true;
                             child.receiveShadow = true;
+                            
+                            // Forza l'aggiornamento del materiale per evitare problemi di cache texture su Android
+                            if(child.material) {
+                                child.material.needsUpdate = true;
+                                child.material.envMapIntensity = 1.0; // Assicura riflessi
+                            }
                         }
                     });
                     
@@ -1096,28 +1103,12 @@
             
             isMainModelInitialized = true;
             
-            // Variabili per l'orientamento
+            // Variabili per l'orientamento interattivo
             let targetRotationX = 0;
             let targetRotationZ = 0;
 
-            // Se siamo su mobile, usiamo il giroscopio invece del tocco
-            if (isMobile) {
-                window.addEventListener('deviceorientation', (event) => {
-                    // Ottieni inclinazione (limitata per sicurezza)
-                    let y = event.beta || 0; // Front/Back tilt (-180 to 180)
-                    let x = event.gamma || 0; // Left/Right tilt (-90 to 90)
-                    
-                    // Clamping per evitare rotazioni estreme
-                    if (x > 45) x = 45; if (x < -45) x = -45;
-                    if (y > 90) y = 90; if (y < -90) y = -90;
-
-                    // Calcola target rotation (molto lieve)
-                    // Sottraiamo 45 da beta perché di solito si tiene il telefono inclinato a 45 gradi
-                    targetRotationX = (y - 45) * 0.02; 
-                    targetRotationZ = x * 0.02;
-                });
-            } else {
-                // Desktop: Mouse Interaction
+            // Logica interazione: Solo Desktop
+            if (!isMobile) {
                 document.addEventListener('mousemove', function(event) {
                     if (!mainModelData.model) return;
                     const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
@@ -1127,6 +1118,7 @@
                     targetRotationZ = mouseX * 0.05;
                 });
             }
+            // Su Mobile non aggiungiamo nessun listener, il barattolo ignora tocchi e giroscopio.
             
             const clock = new THREE.Clock();
             function animateMain() {
@@ -1141,28 +1133,17 @@
                     // Movimento flottante
                     mainModelData.model.position.y = Math.sin(clock.getElapsedTime()) * 0.1;
                     
-                    // Applicazione rotazione interattiva (Mouse o Giroscopio) con Lerp per fluidità
-                    // Se siamo su desktop, targetRotationX viene aggiornato dal mouse
-                    // Se siamo su mobile, viene aggiornato dal deviceorientation
-                    // La logica di applicazione è la stessa per entrambi, cambia solo la sorgente
-                    
-                    // Su desktop, la base era Math.PI * 0.1 + mouseY...
-                    // Su mobile è un offset da 0.
-                    // Quindi dobbiamo gestire i due casi leggermente diversi nell'interpolazione
-                    
-                    if (isMobile) {
-                        // Su mobile aggiungiamo l'inclinazione alla rotazione base (un po' inclinata verso l'utente)
-                         const baseMobileTilt = Math.PI * 0.1;
-                         mainModelData.model.rotation.x = THREE.MathUtils.lerp(mainModelData.model.rotation.x, baseMobileTilt + targetRotationX, 0.1);
-                         mainModelData.model.rotation.z = THREE.MathUtils.lerp(mainModelData.model.rotation.z, targetRotationZ, 0.1);
-                    } else {
-                        // Su desktop usiamo i valori calcolati direttamente dal mousemove che includono già l'offset
-                        // Se targetRotationX è 0 (mouse non ancora mosso), usiamo un default
+                    // Applicazione interazione
+                    if (!isMobile) {
+                        // Desktop: Interazione Mouse
                         const targetX = targetRotationX !== 0 ? targetRotationX : Math.PI * 0.1;
-                        const targetZ = targetRotationZ;
-                        
                         mainModelData.model.rotation.x = THREE.MathUtils.lerp(mainModelData.model.rotation.x, targetX, 0.1);
-                        mainModelData.model.rotation.z = THREE.MathUtils.lerp(mainModelData.model.rotation.z, targetZ, 0.1);
+                        mainModelData.model.rotation.z = THREE.MathUtils.lerp(mainModelData.model.rotation.z, targetRotationZ, 0.1);
+                    } else {
+                        // Mobile: Posizione statica (solo rotazione automatica Y sopra)
+                        // Resetta eventuali rotazioni residue a una posizione neutra piacevole
+                        mainModelData.model.rotation.x = THREE.MathUtils.lerp(mainModelData.model.rotation.x, Math.PI * 0.1, 0.1);
+                        mainModelData.model.rotation.z = THREE.MathUtils.lerp(mainModelData.model.rotation.z, 0, 0.1);
                     }
                 }
                 mainModelData.renderer.render(mainModelData.scene, mainModelData.camera);
@@ -1473,9 +1454,9 @@
                 { id: 9, title: "Scostine", ingredients: ["Pollo", "Aromi", "Olio"], instructions: ["Marinare", "Cuocere"] }
             ],
             dolci: [
-                { id: 13, title: "Scrostata", ingredients: ["Pandoro", "Mascarpone", "Cacao"], instructions: ["Tagliare", "Farcire", "Servire"] },
-                { id: 14, title: "Smarmellamisu", ingredients: ["Meringa", "Frutti di bosco", "Panna"], instructions: ["Montare", "Decorare"] },
-                { id: 15, title: "Sricotta", ingredients: ["Mele", "Cannella", "Pasta sfoglia"], instructions: ["Arrotolare", "Cuocere in forno"] }
+                { id: 13, title: "Sandoro", ingredients: ["Pandoro", "Mascarpone", "Cacao"], instructions: ["Tagliare", "Farcire", "Servire"] },
+                { id: 14, title: "Spavlova", ingredients: ["Meringa", "Frutti di bosco", "Panna"], instructions: ["Montare", "Decorare"] },
+                { id: 15, title: "Strudel", ingredients: ["Mele", "Cannella", "Pasta sfoglia"], instructions: ["Arrotolare", "Cuocere in forno"] }
             ],
             drinks: [
                 { id: 10, title: "Scoffee", ingredients: ["Gin", "Vermouth", "Campari"], instructions: ["Mixare", "Servire"] },
