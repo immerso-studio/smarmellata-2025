@@ -31,6 +31,7 @@
         
         html {
             scroll-behavior: smooth;
+            overscroll-behavior: none; /* Previene l'effetto elastico su Mac/iOS */
         }
         
         body {
@@ -41,12 +42,14 @@
             font-family: 'Inter Tight', sans-serif;
             font-weight: 400;
             -webkit-tap-highlight-color: transparent;
+            overscroll-behavior: none;
         }
         
         /* Container principale */
         .main-container {
             position: relative;
-            height: 100vh;
+            height: 100vh;      /* Fallback */
+            height: 100dvh;     /* Dynamic Viewport Height per mobile */
             overflow-y: scroll;
             scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
@@ -55,9 +58,11 @@
         
         /* Sezioni a tutto schermo */
         .fullscreen-section {
-            height: 100vh;
+            height: 100vh;      /* Fallback */
+            height: 100dvh;     /* Dynamic Viewport Height */
             width: 100%;
             scroll-snap-align: start;
+            scroll-snap-stop: always; /* FIX CRITICO: Forza lo stop su ogni sezione */
             position: relative;
             display: flex;
             align-items: center;
@@ -618,16 +623,16 @@
         
         .mobile-nav-buttons {
             position: absolute;
-            top: auto;
-            bottom: 0; 
+            top: 50%; /* Centrato verticalmente */
+            bottom: auto; 
             left: 0;
             right: 0;
-            height: 123px; 
-            transform: none;
+            height: auto; 
+            transform: translateY(-50%);
             display: flex;
             justify-content: space-between;
             align-items: center; 
-            padding: 0 20px;
+            padding: 0 10px;
             z-index: 20; 
             pointer-events: none; 
         }
@@ -836,6 +841,9 @@
         }
         
         @media (max-width: 768px) {
+            /* Fix Indicatore Mobile */
+            .nav-indicator { top: 50%; right: 20px; }
+
             /* Mostra i dots solo su mobile */
             .cards-dots { display: flex; }
 
@@ -907,7 +915,7 @@
                     <ul id="modalIngredients"></ul>
                 </div>
                 <div class="recipe-modal-instructions">
-                    <h3>Preparazione</h3>
+                    <h3>Procedimento</h3>
                     <ol id="modalInstructions"></ol>
                 </div>
             </div>
@@ -971,7 +979,7 @@
         </section>
         
         <section id="section3" class="fullscreen-section">
-            <div class="oranges-overlay-text">è natale, non il carnevale di Ivrea</div>
+            <div class="oranges-overlay-text">e' natale, non il carnevale di Ivrea</div>
             
             <div id="gyro-btn" class="gyro-button" style="display:none;">
                 <i class="fas fa-mobile-alt"></i> Attiva Gravità
@@ -1052,7 +1060,7 @@
             mainModelData.scene.add(directionalLight);
             
             const pointLight = new THREE.PointLight(0x88ccff, 20, 20);
-            pointLight.position.set(-7, 0, 0);
+            pointLight.position.set(-7, -5, 5);
             mainModelData.scene.add(pointLight);
 
             const loadingElement = document.createElement('div');
@@ -1454,9 +1462,9 @@
                 { id: 9, title: "Scostine", ingredients: ["Pollo", "Aromi", "Olio"], instructions: ["Marinare", "Cuocere"] }
             ],
             dolci: [
-                { id: 13, title: "Sandoro", ingredients: ["Pandoro", "Mascarpone", "Cacao"], instructions: ["Tagliare", "Farcire", "Servire"] },
-                { id: 14, title: "Spavlova", ingredients: ["Meringa", "Frutti di bosco", "Panna"], instructions: ["Montare", "Decorare"] },
-                { id: 15, title: "Strudel", ingredients: ["Mele", "Cannella", "Pasta sfoglia"], instructions: ["Arrotolare", "Cuocere in forno"] }
+                { id: 13, title: "Scrostata", ingredients: ["Pandoro", "Mascarpone", "Cacao"], instructions: ["Tagliare", "Farcire", "Servire"] },
+                { id: 14, title: "Smarmellamisu", ingredients: ["Meringa", "Frutti di bosco", "Panna"], instructions: ["Montare", "Decorare"] },
+                { id: 15, title: "Sricotta", ingredients: ["Mele", "Cannella", "Pasta sfoglia"], instructions: ["Arrotolare", "Cuocere in forno"] }
             ],
             drinks: [
                 { id: 10, title: "Scoffee", ingredients: ["Gin", "Vermouth", "Campari"], instructions: ["Mixare", "Servire"] },
