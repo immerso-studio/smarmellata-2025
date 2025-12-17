@@ -795,6 +795,40 @@
         }
         
         .recipe-modal.active .recipe-modal-title { opacity: 1; transform: translateY(0); }
+
+        /* Nuovi Stili per Meta Data Ricetta */
+        .recipe-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease 0.25s, transform 0.5s ease 0.25s;
+        }
+
+        .recipe-modal.active .recipe-meta { opacity: 1; transform: translateY(0); }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #aeaeae;
+            font-size: 0.95rem;
+            font-family: 'Inter Tight', sans-serif;
+        }
+
+        .meta-item i {
+            color: #ffffff;
+            font-size: 1rem;
+        }
+
+        .meta-value {
+            color: #ffffff;
+            font-weight: 500;
+        }
         
         .recipe-modal-ingredients, .recipe-modal-instructions {
             margin-bottom: 30px;
@@ -826,6 +860,22 @@
         .recipe-modal-ingredients li, .recipe-modal-instructions li {
             margin-bottom: 6px;
         }
+
+        /* Styles per paragrafi e scritta Enjoy */
+        .recipe-modal-instructions p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .recipe-enjoy {
+            font-family: 'AnalogueOS', sans-serif;
+            font-size: 2.5rem;
+            color: #ffffff;
+            text-align: center;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
         
         /* Media Queries per il responsive */
         @media (max-width: 1200px) {
@@ -842,7 +892,7 @@
         
         @media (max-width: 768px) {
             /* Fix Indicatore Mobile */
-            .nav-indicator { top: 50%; right: 20px; }
+            .nav-indicator { top: 75%; right: 20px; }
 
             /* Mostra i dots solo su mobile */
             .cards-dots { display: flex; }
@@ -910,14 +960,33 @@
             </div>
             <div class="recipe-modal-body">
                 <h2 class="recipe-modal-title" id="modalTitle"></h2>
+                
+                <div class="recipe-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-signal"></i>
+                        <span class="meta-value" id="modalDifficulty"></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span class="meta-value" id="modalTime"></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-user-friends"></i>
+                        <span class="meta-value" id="modalPortions"></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-utensils"></i>
+                        <span class="meta-value" id="modalPairing"></span>
+                    </div>
+                </div>
+
                 <div class="recipe-modal-ingredients">
                     <h3>Ingredienti</h3>
                     <ul id="modalIngredients"></ul>
                 </div>
                 <div class="recipe-modal-instructions">
                     <h3>Procedimento</h3>
-                    <ol id="modalInstructions"></ol>
-                </div>
+                    <div id="modalInstructions"></div> </div>
             </div>
         </div>
     </div>
@@ -1006,7 +1075,7 @@
     </div>
     
     <script>
-        // ==================== THREE.JS: MAIN HERO (BARATTOLO) - AGGIORNATO ====================
+        // ==================== THREE.JS: MAIN HERO (BARATTOLO) ====================
         let mainModelData = { scene: null, camera: null, renderer: null, model: null, mixer: null };
         let isMainModelInitialized = false;
         
@@ -1174,12 +1243,14 @@
             mainModelData.scene.add(mainModelData.model);
         }
 
-        // ==================== THREE.JS: ORANGES SCENE (ARANCE + GRAVITÀ INVERTITA + TOGGLE) ====================
+        // ==================== THREE.JS: ORANGES SCENE (OTTIMIZZATA) ====================
         let orangesData = { scene: null, camera: null, renderer: null, oranges: [] };
         let isOrangesInitialized = false;
 
         let gyroEnabled = false;
-        let orientation = { x: 0, y: 0 }; 
+        // Usiamo due vettori per interpolare il movimento e renderlo fluido
+        let targetGravity = { x: 0, y: 0 };
+        let currentGravity = { x: 0, y: 0 };
 
         function initOrangesScene() {
             if (isOrangesInitialized) return;
@@ -1193,9 +1264,12 @@
                 mouseRadius: { mobile: 0.25, desktop: 0.25 },
                 fleeForce: 0.05,
                 baseGravity: 0.0015, 
-                friction: 0.98,
+                friction: 0.98,          // Attrito standard
+                gyroFriction: 0.96,      // Attrito maggiore con giroscopio (più controllo)
                 returnSpeed: 0.05,
-                gyroSensitivity: 0.003
+                gyroSensitivity: 0.001,  // Ridotto drasticamente per meno aggressività
+                gyroLerp: 0.1,           // Fattore di fluidità (più basso = più lento/fluido)
+                maxSpeed: 0.15           // Velocità massima consentita
             };
 
             const isMobile = window.innerWidth < 768;
@@ -1234,19 +1308,25 @@
                     gyroBtn.classList.remove('active');
                     gyroBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> Attiva Gravità';
                     window.removeEventListener('deviceorientation', handleOrientation);
-                    orientation = { x: 0, y: 0 };
+                    // Reset vettori gravità
+                    targetGravity = { x: 0, y: 0 };
+                    currentGravity = { x: 0, y: 0 };
                 }
             }
 
             function handleOrientation(event) {
-                let x = event.gamma || 0; 
-                let y = event.beta || 0; 
+                // Limitiamo i valori massimi di inclinazione per evitare scatti
+                let x = event.gamma || 0; // Inclinazione sinistra/destra
+                let y = event.beta || 0;  // Inclinazione avanti/indietro
 
-                if (x > 90) x = 90; if (x < -90) x = -90;
+                // Clamp dei valori raw del sensore
+                if (x > 60) x = 60; if (x < -60) x = -60;
                 if (y > 90) y = 90; if (y < -90) y = -90;
 
-                orientation.x = x * config.gyroSensitivity; 
-                orientation.y = -(y - 45) * config.gyroSensitivity; 
+                // Calcoliamo il target, non applichiamo subito
+                // Y - 45 serve per considerare la posizione "telefono in mano a 45 gradi" come neutra
+                targetGravity.x = x * config.gyroSensitivity; 
+                targetGravity.y = -(y - 45) * config.gyroSensitivity; 
             }
             
             orangesData.scene = new THREE.Scene();
@@ -1363,13 +1443,23 @@
                 const currentLimitY = viewSize;
                 const mouseRadius = isMobile ? config.mouseRadius.mobile : config.mouseRadius.desktop;
                 
+                // === LOGICA GRAVITA' FLUIDA ===
+                if (gyroEnabled) {
+                    // Interpolazione Lineare (LERP) per smussare il movimento
+                    // currentGravity si avvicina a targetGravity del 10% ogni frame
+                    currentGravity.x += (targetGravity.x - currentGravity.x) * config.gyroLerp;
+                    currentGravity.y += (targetGravity.y - currentGravity.y) * config.gyroLerp;
+                }
+
                 orangesData.oranges.forEach(orange => {
                     const data = orange.userData;
 
                     if (gyroEnabled) {
-                        data.velocity.x += orientation.x;
-                        data.velocity.y += orientation.y;
+                        // Usa la gravità interpolata
+                        data.velocity.x += currentGravity.x;
+                        data.velocity.y += currentGravity.y;
                     } else {
+                        // Gravità standard verso il basso
                         data.velocity.y -= config.baseGravity;
                     }
                     
@@ -1387,19 +1477,41 @@
                         orange.scale.lerp(data.baseScale, config.returnSpeed);
                     }
                     
+                    // Applicazione attrito (diverso se c'è giroscopio attivo)
+                    const currentFriction = gyroEnabled ? config.gyroFriction : config.friction;
+                    data.velocity.multiplyScalar(currentFriction);
+
+                    // === LIMITATORE DI VELOCITA' (MAX SPEED CAP) ===
+                    // Questo impedisce alle arance di impazzire
+                    const speed = data.velocity.length();
+                    if (speed > config.maxSpeed) {
+                        data.velocity.normalize().multiplyScalar(config.maxSpeed);
+                    }
+
                     orange.position.add(data.velocity);
-                    data.velocity.multiplyScalar(config.friction);
                     
                     const r = data.radius;
-                    if(orange.position.x > currentLimitX-r) { orange.position.x = currentLimitX-r; data.velocity.x *= -0.6; }
-                    else if(orange.position.x < -currentLimitX+r) { orange.position.x = -currentLimitX+r; data.velocity.x *= -0.6; }
-                    if(orange.position.y > currentLimitY-r) { orange.position.y = currentLimitY-r; data.velocity.y *= -0.6; }
-                    else if(orange.position.y < -currentLimitY+r) { orange.position.y = -currentLimitY+r; data.velocity.y *= -0.6; }
+                    // Bounces
+                    if(orange.position.x > currentLimitX-r) { 
+                        orange.position.x = currentLimitX-r; 
+                        data.velocity.x *= -0.6; 
+                    } else if(orange.position.x < -currentLimitX+r) { 
+                        orange.position.x = -currentLimitX+r; 
+                        data.velocity.x *= -0.6; 
+                    }
+                    if(orange.position.y > currentLimitY-r) { 
+                        orange.position.y = currentLimitY-r; 
+                        data.velocity.y *= -0.6; 
+                    } else if(orange.position.y < -currentLimitY+r) { 
+                        orange.position.y = -currentLimitY+r; 
+                        data.velocity.y *= -0.6; 
+                    }
                     
                     orange.rotation.x += data.rotSpeed.x + data.velocity.y * 0.2;
                     orange.rotation.y += data.rotSpeed.y - data.velocity.x * 0.2;
                 });
                 
+                // Collisioni tra arance
                 for (let i = 0; i < orangesData.oranges.length; i++) {
                     for (let j = i + 1; j < orangesData.oranges.length; j++) {
                         const o1 = orangesData.oranges[i];
@@ -1447,29 +1559,164 @@
         // ==================== LOGICA CARDS E DATI ====================
         const cardsData = {
             antipasti: [
-                { id: 1, title: "Stagliere", ingredients: ["Pane tostato", "Pomodori", "Basilico", "Olio EVO"], instructions: ["Tagliare pomodori", "Condire", "Servire"] },
-                { id: 2, title: "Sgamberetti", ingredients: ["Salmone", "Avocado", "Lime"], instructions: ["Cubetti", "Condire"] },
-                { id: 3, title: "Stortino", ingredients: ["Manzo", "Parmigiano", "Rucola"], instructions: ["Affettare", "Impiattare"] }
+                { 
+                    id: 1, 
+                    title: "Stagliere", 
+                    ingredients: ["Camembert","Brie","Asiago pressato","Fontina","Parmigiano Reggiano 12 mesi","Raquefort","Pecorino romano","Smarmellata"], 
+                    instructions: ["Porzionare i formaggi su un tagliere e accompagnare con generosa Smarmellata."],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "Spritz Campari, Vino Prosecco superiore, Sidro di mele o Birra Farmhouse ALE",
+                    portions: "QB"
+                },
+                { 
+                    id: 2, 
+                    title: "Sgamberetti", 
+                    ingredients: ["20 gamberi", "100 g di farina di riso", "100 g di farina di cocco", "2 uova", "Sale", "Olio di arachidi","150 g di Smarmellata","2 cucchiai di senape"], 
+                    instructions: ["Iniziate dalla salsa: in una ciotolina mescolate la Smarmellata, la senape e il sale con un cucchiaio o una frusta a mano fino a ottenere una salsa omogenea. Lasciate riposare in frigorifero.","Pulite i gamberi privandoli del carapace e della testa, ma conservando la coda. Con uno stecchino di legno sfilate il filo intestinale, sciacquate e asciugate.","In un piatto sbattete le uova con il sale e disponete le due farine in altri due piatti separati. Passate i gamberi prima nella farina di riso, poi nell'uovo sbattuto e poi nella farina di cocco. Friggeteli, pochi alla volta, in abbondante olio a 170° per circa 1 minuto o comunque fino a doratura.", "Scolateli con un mestolo forato e lasciateli asciugare sulla carta per fritti. Trasferite i gamberi fritti al cocco sul piatto da portata, guarniteli con sale e serviteli con la salsa alla Smarmellata."],
+                    difficulty: "Media",
+                    time: "30 min",
+                    pairing: "Vino Franciacorta Satèn",
+                    portions: "4 persone"
+                },
+                { 
+                    id: 3, 
+                    title: "Stortino", 
+                    ingredients: ["200 g di farina", "100 g di burro", "70 ml di acqua ghiacciata","300 g di Gorgonzola dolce","4 cucchiai di Smarmellata","Un sedano intero"], 
+                    instructions: ["Frullate il burro freddo con la farina per pochi minuti e mettete il tutto in una capiente ciotola e aggiungete l’acqua.", "Impastate a mano fino a che la pasta non risulti morbida. Tagliate a pezzettini piccolissimi un gambetto di sedano e mischiatelo alla pasta, formate una palla e mettete in frigo avvolta dalla pellicola per almeno 40 minuti.","Stendete la pasta sottilmente (circa 1/2 centimetro) e tagliate dei dischi poco più grandi dello stampino che userete per la cottura. Ritagliate anche un disco più piccolo che servirà per chiudere la tortina.","Rivestite lo stampino di carta forno e ricoprite con la pasta, aggiungete 3 o 4 cubetti di gorgonzola e chiudete  con il disco più piccolo.","Rimettete in frigo per circa 10 munti poi infornate a 200° per 15/20 minuti. Trascorso tale tempo togliete dal forno e spalmate uno strato leggero di Smarmellata sulla tortina, e infornate nuovamente per altri 5/10 minuti in base al vostro forno e alla cottura della brisè.","Togliete dal forno e mettete al centro del tortino caldo due cucchiaini abbondanti di Smarmellata e decorate il piatto con la stessa."],
+                    difficulty: "Difficile",
+                    time: "60 min",
+                    pairing: "Birra Imperial Stout",
+                    portions: "4 persone"
+                }
             ],
             primi: [
-                { id: 4, title: "Srisotto", ingredients: ["Riso", "Zafferano", "Brodo"], instructions: ["Tostare", "Cuocere"] },
-                { id: 5, title: "Stofu", ingredients: ["Tagliatelle", "Tartufo", "Burro"], instructions: ["Lessare", "Mantecare"] },
-                { id: 6, title: "Scaprese", ingredients: ["Gnocchi", "Pesto", "Pinoli"], instructions: ["Cuocere", "Condire"] }
+                { 
+                    id: 4, 
+                    title: "Srisotto", 
+                    ingredients: ["360 g di riso carnaroli", "6 gamberi", "⅓ di porro","2 cucchiaini di Smarmellata","Olio per friggere il porro","70 g di burro gelato","Pepe nero","Vino bianco","Un gambo di sedano","Una carota","Una cipolla","Chiodi di garofano"], 
+                    instructions: ["Pulite i gamberi privandoli del carapace della coda e della testa, conservate le teste. Con uno stecchino di legno sfilate il filo intestinale, sciacquate e asciugate.", "Realizzare il brodo di pesce: infilate i chiodi di garofano nella cipolla e mettete a scaldare in abbondante acqua con il sedano, la carota e le teste dei gamberi.","Tostare il riso in un tegame insieme alla metà del porro. Sfumare con il vino bianco. Aggiungete a poco a poco il brodo di pesce filtrato.","Nel frattempo cuocere i gamberi a vapore e tagliarli a pezzetti. Friggere il porro rimasto rendendolo croccante nell’olio. Continuare a mescolare il riso e portarlo a cottura.","Togliere il tegame dal fuoco e aggiungere il burro gelato, il pepe nero macinato, due cucchiaini abbondanti di Smarmellata e mantecare.", "Impiattare il risotto e decorarlo con i gamberi, il porro croccante e la Smarmellata."],
+                    difficulty: "Media",
+                    time: "45 min",
+                    pairing: "Vino Champagne Blanc de Blancs",
+                    portions: "4 persone"
+                },
+                { 
+                    id: 5, 
+                    title: "Stofu", 
+                    ingredients: ["400 g di tofu compatto","3 cucchiai di salsa di soia", "2 cucchiai di sciroppo d’acero", "4 cucchiai di Smarmellata","1 cucchiaio della vostra salsa piccante preferita","Il succo di una arancia","Scorza di arancia","Semi di sesamo","3 peperoni verdi"], 
+                    instructions: ["Iniziate dalla salsa: mescolate in una ciotola: la salsa di soia, la Smarmellata, lo sciroppo d’acero, il succo di arancia e la salsa piccante.", "Nel frattempo tagliate a dadi il tofu e rosolatelo in una padella con un filo d’olio fino a farlo dorare da tutti i lati. Una volta divenuto croccante e dorato, unite la salsa precedentemente preparata al tofu e lasciate cuocere in padella mescolando accuratamente","Unite i peperoni tagliati a striscioline o fettine sottilissime e fate cuocere per qualche minuto a fuoco dolce fino a raggiunere la consistenza desiderata ed impiattare guarnendo con scorza di arancia grattuggiata."],
+                    difficulty: "Facile",
+                    time: "20 min",
+                    pairing: "Vino Orange Wines",
+                    portions: "4 persone"
+                },
+                { 
+                    id: 6, 
+                    title: "Scaprese", 
+                    ingredients: ["2 mozzarelle di bufala", "2 cucchiai di Smarmellata", "Basilico fresco"], 
+                    instructions: ["Tagliare la mozzarella di bufala in spicchi e disporre su un piatto. Con un cucchiaio porzionare la Smarmellata tra gli spicchi di mozzarella di bufala. Lavare bene le foglie di basilico, aggiungere a piacere sul piatto e guarnire con olio EVO"],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "Vino Fiano di Avellino",
+                    portions: "2 persone"
+                }
             ],
             secondi: [
-                { id: 7, title: "Sanatra", ingredients: ["Manzo", "Vino", "Rosmarino"], instructions: ["Grigliare", "Ridurre"] },
-                { id: 8, title: "Ssalmone", ingredients: ["Branzino", "Limone", "Erbe"], instructions: ["Forno", "Servire"] },
-                { id: 9, title: "Scostine", ingredients: ["Pollo", "Aromi", "Olio"], instructions: ["Marinare", "Cuocere"] }
+                { 
+                    id: 7, 
+                    title: "Sanatra", 
+                    ingredients: ["Petto d’anatra (2 da 800 g)", "Bacche di ginepro", "Rosmarino","Olio EVO","60 g di Smarmellata","600 g di patate novelle","Aglio","Sale"], 
+                    instructions: ["Eliminate le piccole piume rimaste attaccate alla pelle dei petti d'anatra con una pinzetta da cucina. Incidete i petti dalla parte della pelle praticando 3 tagli in diagonale e 4 trasversali per creare dei rombi.","Ponete i petti dalla parte incisa in una padella antiaderente ben calda e lasciate cuocere 3 minuti in modo che si crei una crosticina dorata; poi girateli e lasciateli dorare anche sull’altro lato per altri 3 minuti: l’anatra si cuocerà con il suo stesso grasso rilasciato in cottura. Quando i petti saranno pronti, adagiateli con la pelle rivolta verso l’alto in una teglia, che potete foderare con carta da forno. Versate il liquido formatosi in cottura e regolate di sale.", "Mettete la Smarmellata in una ciotolina e poi spennellate la pelle dei petti, coprendoli in maniera uniforme. Con il dorso di un coltello schiacciate le bacche di ginepro, facendo pressione con le mani; condite i petti con le bacche, le foglioline di rosmarino, l’olio e infine versate circa un quarto di bicchiere d’acqua sul fondo della teglia. Coprite con un foglio di alluminio e cuocete in forno statico preriscaldato a 160° per 30-40 minuti (o a 130° per 20-30 minuti se in forno ventilato).","Una volta messo in forno i petti: lavate le patate novelle sotto abbondante acqua fresca corrente. Con un coltello o una mandolina tagliatele a rondelle dello spesso di 2-3 mm senza togliere la buccia, ponendole man mano che le tagliate in un recipiente con dell’acqua per non farle annerire. Una volta terminato, fate rosolare uno spicchio d’aglio sbucciato con un filo di olio in una pentola antiaderente, quindi scolate le patate e asciugatele con un canovaccio pulito. Quando l'aglio avrà preso colore, ponete le patate tagliate a rondelle sul fuoco e cuocete a fuoco medio per 15 minuti, mescolando con un cucchiaio di legno. Aggiungete qualche fogliolina di rosmarino per insaporire e regolate di sale.","Dopo 30-35 minuti, controllate la cottura della carne, tagliando il cuore del petto con un coltello o verificando con una sonda: in questo caso, la temperatura dovrà essere di 71°; se dovesse risultare inferiore, lasciate l’anatra in forno e ricontrollate dopo 5-10 minuti. Una volta pronta, sfornate e impiattate: servite il vostro petto d’anatra laccato alla Smarmellata, accompagnandolo con le patate novelle e qualche fettina o spicchio di arancia."],
+                    difficulty: "Difficile",
+                    time: "90 min",
+                    pairing: "Vino Pinot Nero o Vino Gewürztraminer",
+                    portions: "4 persone"
+                },
+                { 
+                    id: 8, 
+                    title: "Ssalmone", 
+                    ingredients: ["2 porzioni di salmone norvegese da 150 g", "2 cucchiai di Smarmellata", "Olio EVO","Succo di una arancia","2 cucchiai di salsa di soia","2 cucchiai di zucchero di canna","Paprika","Pepe nero"], 
+                    instructions: ["In un recipiente creare una marinatura con l’olio extravergine d’oliva, lo zucchero di canna, la salsa di soia, il succo di arancia, un pizzico di paprika e pepe nero, diluire con acqua se dovesse risultare troppo densa e lasciarvi marinare per 8/10 minuti le porzioni di salmone.", "Sistemarle su una teglia rivestita da carta forno con la pelle rivolta verso il basso e distribuirvi sopra la marinatura rimasta. Infornare a 180° per 8/10 minuti.","Togliere la teglia dal forno e spennellare il salmone con una glassa di Smarmellata ed acqua. Infornare nuovamente per altri 2/3 minuti. Infine sfornare e impiattare decorando con due o tre fettine di arancia e accompagnate con verdure croccanti (asparagi o finocchi)."],
+                    difficulty: "Facile",
+                    time: "50 min",
+                    pairing: "Vino Riesling",
+                    portions: "2 persone"
+                },
+                { 
+                    id: 9, 
+                    title: "Scostine", 
+                    ingredients: ["2 Kg di costine di maiale singole", "200 g di Smarmellata", "2 bicchieri di salsa di soia","Sale","Pepe nero","Vino bianco","Aglio","Salsa piccante (facoltativa)"], 
+                    instructions: ["In una padella disporre le costine e rosolare superficialmente a fuoco alto per tutti i lati.","Quando le costine sono rosolate, prenderle dalla padella e sciacquare con acqua bollente per eliminare il grasso superficiale. Asciugare bene con carta da cucina.", "Disporre le costine in un tegame poi aggiungere l’acqua, mezzo bicchiere di vino bianco, la salsa di soia, la Smarmellata, uno spicchio d’aglio e cuocere a fuoco medio.","Raggiunto il bollore, abbassare il fuoco, togliere la schiuma con una schiumarola. Se si gradisce “spicy” aggiungere la salsa piccante. Continuare a stufare per 30-40 minuti. Girare le costine, poi alzare la fiamma e cuocere ancora per 10-15 minuti senza coperchio per addensare il sugoo.","Lasciare riposare per una mezz’oretta con coperchio prima di servire."],
+                    difficulty: "Media",
+                    time: "90 min",
+                    pairing: "Vino Primitivo di Manduria",
+                    portions: "4 persone"
+                }
             ],
             dolci: [
-                { id: 13, title: "Scrostata", ingredients: ["Pandoro", "Mascarpone", "Cacao"], instructions: ["Tagliare", "Farcire", "Servire"] },
-                { id: 14, title: "Smarmellamisu", ingredients: ["Meringa", "Frutti di bosco", "Panna"], instructions: ["Montare", "Decorare"] },
-                { id: 15, title: "Sricotta", ingredients: ["Mele", "Cannella", "Pasta sfoglia"], instructions: ["Arrotolare", "Cuocere in forno"] }
+                { 
+                    id: 13, 
+                    title: "Scrostata", 
+                    ingredients: ["150 g di mascarpone", "Smarmellata!", "2 Uova","80 g di zucchero","2 cucchiai di zucchero di canna","200 g di farina 00","100 g di burro","Una arancia"], 
+                    instructions: ["Preparare la pasta frolla con il metodo classico: ammorbidire il burro a temperatura ambiente (dovrà risultare morbido ma ancora plastico). Tagliate il burro a cubetti e versarlo in una ciotola. Aggiungere lo zucchero e lavorare il composto con le mani o con una frusta sino ad ottenere una crema. Unire poi un uovo. Mescolare bene (non preoccupatevi se il composto non risulterà troppo omogeneo). Versare la farina tutta in una volta e impastare con le mani, tassativamente fredde. Non appena la farina sarà stata assorbita, trasferire il composto su un piano e impastare molto velocemente sino a che non risulterà omogeneo. Fare una palla, avvolgerla nella pellicola e lasciarla raffreddare in frigorifero per 30 minuti.", "Nell’attesa: sbattere leggermente un uovo con la forchetta, aggiungere il mascarpone e lo zucchero di canna, lavorare il tutto per amalgamare gli ingredienti.", "Preriscaldare il forno a 180°.","Trascorsi i 30 minuti: prendi l’impasto e stendilo, tenere da parte un po’ di frolla che servirà per le striscioline della griglia di copertura (opzionale). Sistemare la frolla in uno stampo da 20 cm e bucarla con la forchetta.","Versa la crema sulla base di frolla, aggiungiere la Smarmellata in superficie e coprire con delle striscioline di pasta frolla (opzionale).","Infornare la crostata a 180° per 30 minuti. Una volta cotta, lasciarla riposare altri 30 minuti prima di servirla e decorate con fette di arancia fresca."],
+                    difficulty: "Difficile",
+                    time: "90 min",
+                    pairing: "Vin Santo del Chianti",
+                    portions: "8 persone"
+                },
+                { 
+                    id: 14, 
+                    title: "Smarmellamisu", 
+                    ingredients: ["3/4 biscotti alla farina di segale", "125 g di Yogurt al caffè", "20 g di Smarmellata","1 tazzina di caffè","Cannella","Lamelle di mandorle tostate"], 
+                    instructions: ["Inzuppare i biscotti in una ciotola dove avrete precedentemente miscelato il caffè alla cannella. Alternare in un vasetto o in un bicchiere, strati di biscotti inzuppati e yogurt al caffè e completare con uno strato di Smarmellata.", "Lasciar riposare in frigorifero per una notte.","Servire completando con lamelle di mandorle."],
+                    difficulty: "Facile",
+                    time: "15 min",
+                    pairing: "Passito di pantelleria o Birra Coffee Stout",
+                    portions: "Per porzione"
+                },
+                { 
+                    id: 15, 
+                    title: "Sricotta", 
+                    ingredients: ["2 fette di ricotta vaccina o di pecora", "Smarmellata", "Pistacchi sgusciati"], 
+                    instructions: ["Tagliare due fette di ricotta di circa 1 cm e metterle per qualche minuto sulla piastra oppure in una padella ben calda. Far dorare da entrambi i lati. Mettere uno o due cucchiaini di Smarmellata sopra la fetta. Togliere dal fuoco, far raffreddare e mettere in frigorifero per almeno 1 ora.", "Decorare con pistacchi sbriciolati prima di servire."],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "Vino Sauvignon Blanc",
+                    portions: "2 persone"
+                }
             ],
             drinks: [
-                { id: 10, title: "Scoffee", ingredients: ["Gin", "Vermouth", "Campari"], instructions: ["Mixare", "Servire"] },
-                { id: 11, title: "Smargarita", ingredients: ["Prosecco", "Aperol", "Soda"], instructions: ["Ghiaccio", "Versare"] },
-                { id: 12, title: "Lady Smarmalade", ingredients: ["Rum", "Menta", "Lime"], instructions: ["Pestare", "Shakerare"] }
+                { 
+                    id: 10, 
+                    title: "Scoffee", 
+                    ingredients: ["Miscela per caffè americano", "Un cucchiaio di Cannella", "4 chiodi di garofano","60 g di Smarmellata","1 cucchiaio di zucchero di canna"], 
+                    instructions: ["Prima di accendere la macchinetta per il caffè americano: Aggiungere alla miscela di caffè la cannella e i chiodi di garofano. Nella caffettiera vuota aggiungere la Smarmellata e lo zucchero.", "Accendere la macchinetta e aspettare che il procedimento di estrazione si concluda.","Prima di servire, mescolare velocemente il caffè aromatizzato, versarne 3/4 di tazza e guarnire a piacere con panna montata e scorza di arancia grattugiata."],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "Cioccolato extra fondente",
+                    portions: "4 persone"
+                },
+                { 
+                    id: 11, 
+                    title: "Smargarita", 
+                    ingredients: ["50 ml di Tequila", "10 ml di Triple sec", "5 ml di sciroppo di miele", "15 ml di succo di limone", "25 ml di succo di pompelmo", "10 g di Smarmellata", "Scorza di pompelmo", "Sale"], 
+                    instructions: ["Raffreddare il bicchiere di presentazione con abbondante ghiaccio.", "In uno shaker aggiungere: la Smarmellata, la Tequila, il Triple sec, lo sciroppo al miele. il succo di limone, il succo di pompelmo e ghiaccio.", "Shakerare energicamente.", "Guarnire il bordo del bicchiere raffreddato con sale.", "Filtrare il composto shakerato nel bicchiere e decorare con la scorza di pompelmo."],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "-",
+                    portions: "1 persona"
+                },
+                { 
+                    id: 12, 
+                    title: "Lady Smarmalade", 
+                    ingredients: ["50 ml di Gin", "15 ml di Bitter", "200 ml acqua tonica", "Un cucchiaio di Smarmellata", "Scorza di arancia"], 
+                    instructions: ["Raffreddare il bicchiere di presentazione con abbondante ghiaccio.", "Mescolare Smarmellata, Gin e Bitter direttamente nel bicchiere raffreddato. Aggiungere ghiaccio e colmare con l’acqua tonica.", "Guarnire con un twist di scorza di arancia."],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "-",
+                    portions: "1 persona"
+                }
             ]
         };
 
@@ -1579,6 +1826,12 @@
             document.getElementById('modalImage').src = getImagePath(cat, idx);
             document.getElementById('modalImage').onerror = function(){this.src=`https://via.placeholder.com/800x400/222/fff?text=${data.title}`};
             
+            // Popola i nuovi campi
+            document.getElementById('modalDifficulty').textContent = data.difficulty || 'N/A';
+            document.getElementById('modalTime').textContent = data.time || 'N/A';
+            document.getElementById('modalPortions').textContent = data.portions || 'N/A';
+            document.getElementById('modalPairing').textContent = data.pairing || 'N/A';
+
             const ingList = document.getElementById('modalIngredients');
             ingList.innerHTML = '';
             data.ingredients.forEach(ing => {
@@ -1588,8 +1841,16 @@
             const insList = document.getElementById('modalInstructions');
             insList.innerHTML = '';
             data.instructions.forEach(ins => {
-                const li = document.createElement('li'); li.textContent = ins; insList.appendChild(li);
+                const p = document.createElement('p'); // Changed to p
+                p.textContent = ins;
+                insList.appendChild(p);
             });
+            
+            // Add Enjoy!
+            const enjoyDiv = document.createElement('div');
+            enjoyDiv.className = 'recipe-enjoy';
+            enjoyDiv.textContent = 'Enjoy!';
+            insList.appendChild(enjoyDiv);
             
             modal.classList.add('active');
         }
