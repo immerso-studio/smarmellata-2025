@@ -15,34 +15,6 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
 
     <style>
-        /* --- STILI PRELOADER (AGGIUNTI) --- */
-        #preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #0a0a0a;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.8s cubic-bezier(0.65, 0, 0.35, 1), visibility 0.8s;
-        }
-        #preloader.finished {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        .loader-content { text-align: center; width: 250px; }
-        .loader-logo { width: 80px; margin-bottom: 30px; animation: pulse 2s infinite ease-in-out; }
-        .progress-wrapper { width: 100%; height: 2px; background: rgba(255, 255, 255, 0.1); margin-bottom: 15px; overflow: hidden; }
-        #loader-bar { width: 0%; height: 100%; background: #ffffff; transition: width 0.3s ease; }
-        #loader-text { font-family: 'Inter Tight', sans-serif; font-size: 0.7rem; letter-spacing: 2px; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
-
-        /* --- TUO STILE ORIGINALE (INVARIATO) --- */
         @font-face {
             font-family: 'AnalogueOS';
             src: url('assets/AnalogueOS-Regular.otf') format('opentype');
@@ -59,7 +31,7 @@
         
         html {
             scroll-behavior: smooth;
-            overscroll-behavior: none; 
+            overscroll-behavior: none; /* Previene l'effetto elastico su Mac/iOS */
         }
         
         body {
@@ -73,22 +45,24 @@
             overscroll-behavior: none;
         }
         
+        /* Container principale */
         .main-container {
             position: relative;
-            height: 100vh;      
-            height: 100dvh;     
+            height: 100vh;      /* Fallback */
+            height: 100dvh;     /* Dynamic Viewport Height per mobile */
             overflow-y: scroll;
             scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
             overflow-x: hidden;
         }
         
+        /* Sezioni a tutto schermo */
         .fullscreen-section {
-            height: 100vh;      
-            height: 100dvh;     
+            height: 100vh;      /* Fallback */
+            height: 100dvh;     /* Dynamic Viewport Height */
             width: 100%;
             scroll-snap-align: start;
-            scroll-snap-stop: always; 
+            scroll-snap-stop: always; /* FIX CRITICO: Forza lo stop su ogni sezione */
             position: relative;
             display: flex;
             align-items: center;
@@ -96,6 +70,7 @@
             overflow: hidden;
         }
         
+        /* Contenuto sezione */
         .section-content {
             max-width: 1200px;
             width: 90%;
@@ -111,6 +86,7 @@
             visibility: visible;
         }
         
+        /* Prima sezione speciale */
         #section1 {
             background: url('assets/IMG/SFONDO/sfondo5.webp');
             background-size: cover;
@@ -134,6 +110,7 @@
             z-index: 1;
         }
         
+        /* Titolo principale */
         .hero-title {
             position: relative;
             z-index: 10;
@@ -184,6 +161,7 @@
             transform: rotate(10deg);
         }
         
+        /* Container per il modello 3D Hero */
         #model-container {
             position: absolute;
             top: 0;
@@ -196,10 +174,12 @@
             opacity: 1; 
         }
         
+        /* Sezione 2 */
         #section2 {
             background: linear-gradient(135deg, rgb(30, 30, 30) 0%, rgba(10, 10, 10, 1) 100%);
         }
         
+        /* SEZIONE 3 (ARANCE) */
         #section3 {
             background-color: #111;
             position: relative;
@@ -233,6 +213,7 @@
             user-select: none;
         }
 
+        /* Pulsante attivazione Giroscopio - Aggiornato per Toggle */
         .gyro-button {
             position: absolute;
             bottom: 100px;
@@ -282,6 +263,7 @@
             z-index: 1;
         }
         
+        /* Styles Generici */
         .section-title {
             font-family: 'AnalogueOS', sans-serif;
             font-size: 4.5rem;
@@ -310,6 +292,7 @@
             to { opacity: 1; }
         }
         
+        /* Navigation Indicator */
         .nav-indicator {
             position: fixed;
             right: 30px;
@@ -362,8 +345,9 @@
             font-family: 'Inter Tight', sans-serif;
         }
         
-        .nav-dot:hover .nav-label { opacity: 1; }
+        .nav-dot:hover .nav-label { opacity: 0; }
         
+        /* Logo Fisso */
         .logo-fixed {
             position: fixed;
             top: 40px;
@@ -379,6 +363,7 @@
         .logo-fixed:hover { transform: scale(1.05); }
         .logo-img { width: 100%; height: auto; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)); }
         
+        /* Scroll Arrow */
         .scroll-arrow {
             position: absolute;
             bottom: 40px;
@@ -401,6 +386,7 @@
             60% { transform: translateX(-50%) translateY(-5px); }
         }
         
+        /* Progress bar */
         .scroll-progress {
             position: fixed;
             top: 0;
@@ -443,6 +429,7 @@
             font-family: 'Inter Tight', sans-serif;
         }
         
+        /* Categorie e Cards */
         .categories-section {
             margin-top: 50px;
             opacity: 0;
@@ -508,8 +495,14 @@
         }
         
         @keyframes cardEntrance {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .desktop-card {
@@ -630,7 +623,7 @@
         
         .mobile-nav-buttons {
             position: absolute;
-            top: 50%; 
+            top: 50%; /* Centrato verticalmente */
             bottom: auto; 
             left: 0;
             right: 0;
@@ -688,6 +681,7 @@
             transform: scale(1.2);
         }
         
+        /* Modale Ricetta */
         .recipe-modal {
             display: none;
             position: fixed;
@@ -802,6 +796,7 @@
         
         .recipe-modal.active .recipe-modal-title { opacity: 1; transform: translateY(0); }
 
+        /* Nuovi Stili per Meta Data Ricetta */
         .recipe-meta {
             display: flex;
             flex-wrap: wrap;
@@ -866,6 +861,7 @@
             margin-bottom: 6px;
         }
 
+        /* Styles per paragrafi e scritta Enjoy */
         .recipe-modal-instructions p {
             margin-bottom: 15px;
             line-height: 1.6;
@@ -881,6 +877,7 @@
             opacity: 0.8;
         }
         
+        /* Media Queries per il responsive */
         @media (max-width: 1200px) {
             .main-title { font-size: 7rem; }
             .desktop-cards { grid-template-columns: repeat(2, 1fr); }
@@ -894,14 +891,20 @@
         }
         
         @media (max-width: 768px) {
+            /* Fix Indicatore Mobile */
             .nav-indicator { top: 75%; right: 20px; }
+
+            /* Mostra i dots solo su mobile */
             .cards-dots { display: flex; }
+
             .hero-title { display: inline-block; }
             .main-title { font-size: 4rem; margin-top: -30px; }
             .year-badge { position: absolute; top: -5px; right: -40px; left: auto; transform: rotate(10deg); font-size: 0.8rem; padding: 3px 10px; vertical-align: baseline; }
             .hero-subtitle { font-size: 1.1rem;}
+
             .desktop-cards { display: none; }
             .logo-fixed { width: 45px; top: 20px; left: 20px; }
+            
             #section2 .section-content {
                 display: flex;
                 flex-direction: column;
@@ -913,9 +916,11 @@
                 overflow-x: hidden;
                 width: 100%;
             }
+            
             .categories-section { margin-top: 10px; display: block; width: 100%; overflow-x: hidden; }
             .categories-tabs { justify-content: center; gap: 8px; margin-bottom: 20px; }
             .category-tab { padding: 8px 16px; font-size: 0.85rem; margin-bottom: 5px; }
+            
             .mobile-cards-container { 
                 display: block; 
                 height: 50vh; 
@@ -923,6 +928,7 @@
                 margin: auto;
                 overflow: hidden; 
             }
+            
             .section-title { margin-bottom: 15px; font-size: 2.5rem; padding-left: 10px;}
             .oranges-overlay-text { font-size: 1.5rem; letter-spacing: 2px;}
         }
@@ -936,16 +942,6 @@
     </style>
 </head>
 <body>
-    <div id="preloader">
-        <div class="loader-content">
-            <img src="assets/IMG/LOGO/logo.webp" alt="Logo" class="loader-logo">
-            <div class="progress-wrapper">
-                <div id="loader-bar"></div>
-            </div>
-            <p id="loader-text">SMARMELLANDO... 0%</p>
-        </div>
-    </div>
-
     <div class="scroll-progress">
         <div class="scroll-progress-bar" id="scrollProgress"></div>
     </div>
@@ -1079,23 +1075,6 @@
     </div>
     
     <script>
-        // ==================== MANAGER CARICAMENTO (AGGIUNTO) ====================
-        const loadingManager = new THREE.LoadingManager();
-        const loaderBar = document.getElementById('loader-bar');
-        const loaderText = document.getElementById('loader-text');
-
-        loadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
-            const progress = (itemsLoaded / itemsTotal) * 100;
-            loaderBar.style.width = progress + '%';
-            loaderText.textContent = `SMARMELLANDO... ${Math.round(progress)}%`;
-        };
-
-        loadingManager.onLoad = function() {
-            setTimeout(() => {
-                document.getElementById('preloader').classList.add('finished');
-            }, 800);
-        };
-
         // ==================== THREE.JS: MAIN HERO (BARATTOLO) ====================
         let mainModelData = { scene: null, camera: null, renderer: null, model: null, mixer: null };
         let isMainModelInitialized = false;
@@ -1104,8 +1083,9 @@
             if (isMainModelInitialized) return;
             
             const container = document.getElementById('model-container');
-            const isMobile = window.innerWidth < 768; 
+            const isMobile = window.innerWidth < 768; // Rilevamento Mobile
             
+            // Scene setup
             mainModelData.scene = new THREE.Scene();
             mainModelData.scene.fog = new THREE.Fog(0x0a0a0a, 10, 40);
             
@@ -1126,7 +1106,7 @@
             mainModelData.renderer.physicallyCorrectLights = true; 
             mainModelData.renderer.outputEncoding = THREE.sRGBEncoding;
             mainModelData.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            mainModelData.renderer.toneMappingExposure = 1;
+            mainModelData.renderer.toneMappingExposure = 1.0;
             
             mainModelData.renderer.shadowMap.enabled = true;
             mainModelData.renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
@@ -1157,8 +1137,8 @@
             loadingElement.textContent = 'Caricamento modello...';
             container.appendChild(loadingElement);
             
-            // USIAMO IL LOADING MANAGER QUI
-            const loader = new THREE.GLTFLoader(loadingManager);
+            const loader = new THREE.GLTFLoader();
+            // Aggiunto Cache Buster ?v=...
             loader.load(
                 'assets/Smarmellata.glb?v=' + new Date().getTime(),
                 function(gltf) {
@@ -1171,9 +1151,11 @@
                         if (child.isMesh) {
                             child.castShadow = true;
                             child.receiveShadow = true;
+                            
+                            // Forza l'aggiornamento del materiale per evitare problemi di cache texture su Android
                             if(child.material) {
                                 child.material.needsUpdate = true;
-                                child.material.envMapIntensity = 1.0; 
+                                child.material.envMapIntensity = 1.0; // Assicura riflessi
                             }
                         }
                     });
@@ -1197,32 +1179,46 @@
             );
             
             isMainModelInitialized = true;
+            
+            // Variabili per l'orientamento interattivo
             let targetRotationX = 0;
             let targetRotationZ = 0;
 
+            // Logica interazione: Solo Desktop
             if (!isMobile) {
                 document.addEventListener('mousemove', function(event) {
                     if (!mainModelData.model) return;
                     const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
                     const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+                    
                     targetRotationX = Math.PI * 0.1 + mouseY * 0.05;
                     targetRotationZ = mouseX * 0.05;
                 });
             }
+            // Su Mobile non aggiungiamo nessun listener, il barattolo ignora tocchi e giroscopio.
             
             const clock = new THREE.Clock();
             function animateMain() {
                 requestAnimationFrame(animateMain);
+                
                 const delta = clock.getDelta();
                 if (mainModelData.mixer) mainModelData.mixer.update(delta);
+                
                 if (mainModelData.model) {
+                    // Rotazione automatica di base
                     mainModelData.model.rotation.y += -0.005;
+                    // Movimento flottante
                     mainModelData.model.position.y = Math.sin(clock.getElapsedTime()) * 0.1;
+                    
+                    // Applicazione interazione
                     if (!isMobile) {
+                        // Desktop: Interazione Mouse
                         const targetX = targetRotationX !== 0 ? targetRotationX : Math.PI * 0.1;
                         mainModelData.model.rotation.x = THREE.MathUtils.lerp(mainModelData.model.rotation.x, targetX, 0.1);
                         mainModelData.model.rotation.z = THREE.MathUtils.lerp(mainModelData.model.rotation.z, targetRotationZ, 0.1);
                     } else {
+                        // Mobile: Posizione statica (solo rotazione automatica Y sopra)
+                        // Resetta eventuali rotazioni residue a una posizione neutra piacevole
                         mainModelData.model.rotation.x = THREE.MathUtils.lerp(mainModelData.model.rotation.x, Math.PI * 0.1, 0.1);
                         mainModelData.model.rotation.z = THREE.MathUtils.lerp(mainModelData.model.rotation.z, 0, 0.1);
                     }
@@ -1247,15 +1243,18 @@
             mainModelData.scene.add(mainModelData.model);
         }
 
-        // ==================== THREE.JS: ORANGES SCENE ====================
+        // ==================== THREE.JS: ORANGES SCENE (OTTIMIZZATA) ====================
         let orangesData = { scene: null, camera: null, renderer: null, oranges: [] };
         let isOrangesInitialized = false;
+
         let gyroEnabled = false;
+        // Usiamo due vettori per interpolare il movimento e renderlo fluido
         let targetGravity = { x: 0, y: 0 };
         let currentGravity = { x: 0, y: 0 };
 
         function initOrangesScene() {
             if (isOrangesInitialized) return;
+
             const container = document.getElementById('oranges-canvas-container');
             const gyroBtn = document.getElementById('gyro-btn');
 
@@ -1265,27 +1264,37 @@
                 mouseRadius: { mobile: 0.25, desktop: 0.25 },
                 fleeForce: 0.05,
                 baseGravity: 0.0015, 
-                friction: 0.98,          
-                gyroFriction: 0.96,      
+                friction: 0.98,          // Attrito standard
+                gyroFriction: 0.96,      // Attrito maggiore con giroscopio (più controllo)
                 returnSpeed: 0.05,
-                gyroSensitivity: 0.001,  
-                gyroLerp: 0.1,           
-                maxSpeed: 0.15           
+                gyroSensitivity: 0.001,  // Ridotto drasticamente per meno aggressività
+                gyroLerp: 0.1,           // Fattore di fluidità (più basso = più lento/fluido)
+                maxSpeed: 0.15           // Velocità massima consentita
             };
 
             const isMobile = window.innerWidth < 768;
+
             if (isMobile) {
                 gyroBtn.style.display = 'flex';
+                
                 gyroBtn.onclick = function() {
                     if (!gyroEnabled) {
                         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                             DeviceOrientationEvent.requestPermission()
                                 .then(response => {
-                                    if (response === 'granted') toggleGyro(true);
+                                    if (response === 'granted') {
+                                        toggleGyro(true);
+                                    } else {
+                                        alert("Permesso negato.");
+                                    }
                                 })
                                 .catch(console.error);
-                        } else { toggleGyro(true); }
-                    } else { toggleGyro(false); }
+                        } else {
+                            toggleGyro(true);
+                        }
+                    } else {
+                        toggleGyro(false);
+                    }
                 };
             }
 
@@ -1299,25 +1308,36 @@
                     gyroBtn.classList.remove('active');
                     gyroBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> Attiva Gravità';
                     window.removeEventListener('deviceorientation', handleOrientation);
+                    // Reset vettori gravità
                     targetGravity = { x: 0, y: 0 };
                     currentGravity = { x: 0, y: 0 };
                 }
             }
 
             function handleOrientation(event) {
-                let x = event.gamma || 0; 
-                let y = event.beta || 0;  
+                // Limitiamo i valori massimi di inclinazione per evitare scatti
+                let x = event.gamma || 0; // Inclinazione sinistra/destra
+                let y = event.beta || 0;  // Inclinazione avanti/indietro
+
+                // Clamp dei valori raw del sensore
                 if (x > 60) x = 60; if (x < -60) x = -60;
                 if (y > 90) y = 90; if (y < -90) y = -90;
+
+                // Calcoliamo il target, non applichiamo subito
+                // Y - 45 serve per considerare la posizione "telefono in mano a 45 gradi" come neutra
                 targetGravity.x = x * config.gyroSensitivity; 
                 targetGravity.y = -(y - 45) * config.gyroSensitivity; 
             }
             
             orangesData.scene = new THREE.Scene();
             orangesData.scene.background = new THREE.Color(config.bgColor);
+            
             let aspect = container.clientWidth / container.clientHeight;
             const viewSize = 2;
-            orangesData.camera = new THREE.OrthographicCamera(-viewSize * aspect, viewSize * aspect, viewSize, -viewSize, 0.1, 1000);
+            
+            orangesData.camera = new THREE.OrthographicCamera(
+                -viewSize * aspect, viewSize * aspect, viewSize, -viewSize, 0.1, 1000
+            );
             orangesData.camera.position.z = 10;
             
             orangesData.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
@@ -1330,42 +1350,66 @@
             const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
             dirLight.position.set(5, 10, 7);
             orangesData.scene.add(dirLight);
+            const fillLight = new THREE.PointLight(0xffaa00, 0.5);
+            fillLight.position.set(-5, -5, 5);
+            orangesData.scene.add(fillLight);
             
-            // USIAMO IL LOADING MANAGER QUI
-            const loader = new THREE.GLTFLoader(loadingManager);
+            const loader = new THREE.GLTFLoader();
             loader.load('assets/Arancia.glb', function (gltf) {
                 const model = gltf.scene;
                 const box = new THREE.Box3().setFromObject(model);
                 const size = box.getSize(new THREE.Vector3());
-                const scaleFactor = 2 / Math.max(size.x, size.y, size.z);
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scaleFactor = 2 / maxDim;
+                
                 const center = box.getCenter(new THREE.Vector3());
                 model.position.sub(center);
                 const wrapper = new THREE.Group();
                 model.scale.set(scaleFactor, scaleFactor, scaleFactor);
                 wrapper.add(model);
+                
                 spawnOranges(wrapper);
             }, undefined, function (error) {
                 const geometry = new THREE.SphereGeometry(0.5, 32, 32);
                 const material = new THREE.MeshStandardMaterial({ color: 0xffa500, roughness: 0.5 });
-                spawnOranges(new THREE.Mesh(geometry, material));
+                const sphere = new THREE.Mesh(geometry, material);
+                spawnOranges(sphere);
             });
             
             function spawnOranges(masterModel) {
                 const count = isMobile ? config.count.mobile : config.count.desktop;
                 const limitX = viewSize * aspect;
                 const limitY = viewSize;
+                
                 for (let i = 0; i < count; i++) {
                     const orange = masterModel.clone();
                     const baseScale = 0.20 + Math.random() * 0.15;
                     orange.scale.set(baseScale, baseScale, baseScale);
-                    let x = (Math.random() - 0.5) * 2 * limitX;
-                    let y = (Math.random() - 0.5) * 2 * limitY;
+                    
+                    let x, y, attempts = 0, overlap = true;
+                    const myRadius = baseScale * 0.5;
+                    
+                    while(overlap && attempts < 50) {
+                        x = (Math.random() - 0.5) * 2 * (limitX - myRadius);
+                        y = (Math.random() - 0.5) * 2 * (limitY - myRadius);
+                        overlap = false;
+                        for(let existing of orangesData.oranges) {
+                            const dx = x - existing.position.x;
+                            const dy = y - existing.position.y;
+                            if(Math.sqrt(dx*dx + dy*dy) < (myRadius + existing.userData.radius)) {
+                                overlap = true; break;
+                            }
+                        }
+                        attempts++;
+                    }
                     orange.position.set(x, y, (Math.random() - 0.5) * 0.5);
+                    orange.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+                    
                     orange.userData = {
                         velocity: new THREE.Vector3(0, 0, 0),
                         baseScale: new THREE.Vector3(baseScale, baseScale, baseScale),
                         rotSpeed: new THREE.Vector3((Math.random()-0.5)*0.02, (Math.random()-0.5)*0.02, 0),
-                        radius: baseScale * 0.5
+                        radius: myRadius
                     };
                     orangesData.scene.add(orange);
                     orangesData.oranges.push(orange);
@@ -1373,83 +1417,306 @@
             }
             
             const mouse = new THREE.Vector2(-1000, -1000);
-            const mouse3D = new THREE.Vector3();
             const raycaster = new THREE.Raycaster();
             const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-
+            const mouse3D = new THREE.Vector3();
+            
             function updateMouse(clientX, clientY) {
                 const rect = container.getBoundingClientRect();
-                mouse.x = ((clientX - rect.left) / container.clientWidth) * 2 - 1;
-                mouse.y = -((clientY - rect.top) / container.clientHeight) * 2 + 1;
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
+                mouse.x = (x / container.clientWidth) * 2 - 1;
+                mouse.y = -(y / container.clientHeight) * 2 + 1;
                 raycaster.setFromCamera(mouse, orangesData.camera);
                 raycaster.ray.intersectPlane(plane, mouse3D);
             }
             
             document.addEventListener('mousemove', e => updateMouse(e.clientX, e.clientY));
+            document.addEventListener('touchmove', e => {
+                if(e.touches.length > 0) updateMouse(e.touches[0].clientX, e.touches[0].clientY);
+            }, {passive: false});
+            document.addEventListener('touchend', () => { mouse.set(-1000, -1000); mouse3D.set(-1000, -1000, 0); });
             
             function animateOranges() {
                 requestAnimationFrame(animateOranges);
                 const currentLimitX = viewSize * (container.clientWidth / container.clientHeight);
                 const currentLimitY = viewSize;
+                const mouseRadius = isMobile ? config.mouseRadius.mobile : config.mouseRadius.desktop;
+                
+                // === LOGICA GRAVITA' FLUIDA ===
                 if (gyroEnabled) {
+                    // Interpolazione Lineare (LERP) per smussare il movimento
+                    // currentGravity si avvicina a targetGravity del 10% ogni frame
                     currentGravity.x += (targetGravity.x - currentGravity.x) * config.gyroLerp;
                     currentGravity.y += (targetGravity.y - currentGravity.y) * config.gyroLerp;
                 }
+
                 orangesData.oranges.forEach(orange => {
                     const data = orange.userData;
+
                     if (gyroEnabled) {
+                        // Usa la gravità interpolata
                         data.velocity.x += currentGravity.x;
                         data.velocity.y += currentGravity.y;
-                    } else { data.velocity.y -= config.baseGravity; }
+                    } else {
+                        // Gravità standard verso il basso
+                        data.velocity.y -= config.baseGravity;
+                    }
+                    
                     const dx = orange.position.x - mouse3D.x;
                     const dy = orange.position.y - mouse3D.y;
                     const dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < config.mouseRadius.desktop * 2) {
-                        const force = (1 - dist / (config.mouseRadius.desktop * 2)) * config.fleeForce;
+                    
+                    if (dist < mouseRadius * 2) {
+                        const force = (1 - dist / (mouseRadius * 2)) * config.fleeForce;
                         const angle = Math.atan2(dy, dx);
                         data.velocity.x += Math.cos(angle) * force;
                         data.velocity.y += Math.sin(angle) * force;
+                        orange.scale.set(data.baseScale.x*(1+force), data.baseScale.y*(1-force*0.5), data.baseScale.z*(1-force*0.5));
+                    } else {
+                        orange.scale.lerp(data.baseScale, config.returnSpeed);
                     }
-                    data.velocity.multiplyScalar(gyroEnabled ? config.gyroFriction : config.friction);
+                    
+                    // Applicazione attrito (diverso se c'è giroscopio attivo)
+                    const currentFriction = gyroEnabled ? config.gyroFriction : config.friction;
+                    data.velocity.multiplyScalar(currentFriction);
+
+                    // === LIMITATORE DI VELOCITA' (MAX SPEED CAP) ===
+                    // Questo impedisce alle arance di impazzire
+                    const speed = data.velocity.length();
+                    if (speed > config.maxSpeed) {
+                        data.velocity.normalize().multiplyScalar(config.maxSpeed);
+                    }
+
                     orange.position.add(data.velocity);
-                    if(orange.position.x > currentLimitX-data.radius) { orange.position.x = currentLimitX-data.radius; data.velocity.x *= -0.6; }
-                    else if(orange.position.x < -currentLimitX+data.radius) { orange.position.x = -currentLimitX+data.radius; data.velocity.x *= -0.6; }
-                    if(orange.position.y > currentLimitY-data.radius) { orange.position.y = currentLimitY-data.radius; data.velocity.y *= -0.6; }
-                    else if(orange.position.y < -currentLimitY+data.radius) { orange.position.y = -currentLimitY+data.radius; data.velocity.y *= -0.6; }
-                    orange.rotation.x += data.rotSpeed.x; orange.rotation.y += data.rotSpeed.y;
+                    
+                    const r = data.radius;
+                    // Bounces
+                    if(orange.position.x > currentLimitX-r) { 
+                        orange.position.x = currentLimitX-r; 
+                        data.velocity.x *= -0.6; 
+                    } else if(orange.position.x < -currentLimitX+r) { 
+                        orange.position.x = -currentLimitX+r; 
+                        data.velocity.x *= -0.6; 
+                    }
+                    if(orange.position.y > currentLimitY-r) { 
+                        orange.position.y = currentLimitY-r; 
+                        data.velocity.y *= -0.6; 
+                    } else if(orange.position.y < -currentLimitY+r) { 
+                        orange.position.y = -currentLimitY+r; 
+                        data.velocity.y *= -0.6; 
+                    }
+                    
+                    orange.rotation.x += data.rotSpeed.x + data.velocity.y * 0.2;
+                    orange.rotation.y += data.rotSpeed.y - data.velocity.x * 0.2;
                 });
+                
+                // Collisioni tra arance
+                for (let i = 0; i < orangesData.oranges.length; i++) {
+                    for (let j = i + 1; j < orangesData.oranges.length; j++) {
+                        const o1 = orangesData.oranges[i];
+                        const o2 = orangesData.oranges[j];
+                        const dx = o1.position.x - o2.position.x;
+                        const dy = o1.position.y - o2.position.y;
+                        const distSq = dx*dx + dy*dy;
+                        const minDist = o1.userData.radius + o2.userData.radius;
+                        
+                        if(distSq < minDist*minDist && distSq > 0.0001) {
+                            const dist = Math.sqrt(distSq);
+                            const overlap = minDist - dist;
+                            const nx = dx/dist; const ny = dy/dist;
+                            o1.position.x += nx*overlap*0.5; o1.position.y += ny*overlap*0.5;
+                            o2.position.x -= nx*overlap*0.5; o2.position.y -= ny*overlap*0.5;
+                            const dvx = o1.userData.velocity.x - o2.userData.velocity.x;
+                            const dvy = o1.userData.velocity.y - o2.userData.velocity.y;
+                            const velNormal = dvx*nx + dvy*ny;
+                            if(velNormal < 0) {
+                                const j = -(1.5) * velNormal / 2;
+                                o1.userData.velocity.x += j*nx; o1.userData.velocity.y += j*ny;
+                                o2.userData.velocity.x -= j*nx; o2.userData.velocity.y -= j*ny;
+                            }
+                        }
+                    }
+                }
                 orangesData.renderer.render(orangesData.scene, orangesData.camera);
             }
             animateOranges();
             isOrangesInitialized = true;
+            
+            window.addEventListener('resize', function() {
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                const newAspect = w / h;
+                orangesData.camera.left = -viewSize * newAspect;
+                orangesData.camera.right = viewSize * newAspect;
+                orangesData.camera.top = viewSize;
+                orangesData.camera.bottom = -viewSize;
+                orangesData.camera.updateProjectionMatrix();
+                orangesData.renderer.setSize(w, h);
+            });
         }
         
-        // ==================== TUOI DATI E LOGICA CARDS (INVARIATI) ====================
+        // ==================== LOGICA CARDS E DATI ====================
         const cardsData = {
             antipasti: [
-                { id: 1, title: "Stagliere", ingredients: ["Camembert","Brie","Asiago pressato","Fontina","Parmigiano Reggiano 12 mesi","Raquefort","Pecorino romano","Smarmellata"], instructions: ["Porzionare i formaggi su un tagliere e accompagnare con generosa Smarmellata."], difficulty: "Facile", time: "5 min", pairing: "Spritz Campari, Vino Prosecco superiore, Sidro di mele o Birra Farmhouse ALE", portions: "QB" },
-                { id: 2, title: "Sgamberetti", ingredients: ["20 gamberi", "100 g di farina di riso", "100 g di farina di cocco", "2 uova", "Sale", "Olio di arachidi","150 g di Smarmellata","2 cucchiai di senape"], instructions: ["Iniziate dalla salsa: in una ciotolina mescolate la Smarmellata, la senape e il sale con un cucchiaio o una frusta a mano fino a ottenere una salsa omogenea. Lasciate riposare in frigorifero.","Pulite i gamberi privandoli del carapace e della testa, ma conservando la coda. Con uno stecchino di legno sfilate il filo intestinale, sciacquate e asciugate.","In un piatto sbattete le uova con il sale e disponete le due farine in altri due piatti separati. Passate i gamberi prima nella farina di riso, poi nell'uovo sbattuto e poi nella farina di cocco. Friggeteli, pochi alla volta, in abbondante olio a 170° per circa 1 minuto o comunque fino a doratura.", "Scolateli con un mestolo forato e lasciateli asciugare sulla carta per fritti. Trasferite i gamberi fritti al cocco sul piatto da portata, guarniteli con sale e serviteli con la salsa alla Smarmellata."], difficulty: "Media", time: "30 min", pairing: "Vino Franciacorta Satèn", portions: "4 persone" },
-                { id: 3, title: "Stortino", ingredients: ["200 g di farina", "100 g di burro", "70 ml di acqua ghiacciata","300 g di Gorgonzola dolce","4 cucchiai di Smarmellata","Un sedano intero"], instructions: ["Frullate il burro freddo con la farina per pochi minuti e mettete il tutto in una capiente ciotola e aggiungete l’acqua.", "Impastate a mano fino a che la pasta non risulti morbida. Tagliate a pezzettini piccolissimi un gambetto di sedano e mischiatelo alla pasta, formate una palla e mettete in frigo avvolta dalla pellicola per almeno 40 minuti.","Stendete la pasta sottilmente (circa 1/2 centimetro) e tagliate dei dischi poco più grandi dello stampino che userete per la cottura. Ritagliate anche un disco più piccolo che servirà per chiudere la tortina.","Rivestite lo stampino di carta forno e ricoprite con la pasta, aggiungete 3 o 4 cubetti di gorgonzola e chiudete con il disco più piccolo.","Rimettete in frigo per circa 10 munti poi infornate a 200° per 15/20 minuti. Trascorso tale tempo togliete dal forno e spalmate uno strato leggero di Smarmellata sulla tortina, e infornate nuovamente per altri 5/10 minuti in base al vostro forno e alla cottura della brisè.","Togliete dal forno e mettete al centro del tortino caldo due cucchiaini abbondanti di Smarmellata e decorate il piatto con la stessa."], difficulty: "Difficile", time: "60 min", pairing: "Birra Imperial Stout", portions: "4 persone" }
+                { 
+                    id: 1, 
+                    title: "Stagliere", 
+                    ingredients: ["Camembert","Brie","Asiago pressato","Fontina","Parmigiano Reggiano 12 mesi","Raquefort","Pecorino romano","Smarmellata"], 
+                    instructions: ["Porzionare i formaggi su un tagliere e accompagnare con generosa Smarmellata."],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "Spritz Campari, Vino Prosecco superiore, Sidro di mele o Birra Farmhouse ALE",
+                    portions: "QB"
+                },
+                { 
+                    id: 2, 
+                    title: "Sgamberetti", 
+                    ingredients: ["20 gamberi", "100 g di farina di riso", "100 g di farina di cocco", "2 uova", "Sale", "Olio di arachidi","150 g di Smarmellata","2 cucchiai di senape"], 
+                    instructions: ["Iniziate dalla salsa: in una ciotolina mescolate la Smarmellata, la senape e il sale con un cucchiaio o una frusta a mano fino a ottenere una salsa omogenea. Lasciate riposare in frigorifero.","Pulite i gamberi privandoli del carapace e della testa, ma conservando la coda. Con uno stecchino di legno sfilate il filo intestinale, sciacquate e asciugate.","In un piatto sbattete le uova con il sale e disponete le due farine in altri due piatti separati. Passate i gamberi prima nella farina di riso, poi nell'uovo sbattuto e poi nella farina di cocco. Friggeteli, pochi alla volta, in abbondante olio a 170° per circa 1 minuto o comunque fino a doratura.", "Scolateli con un mestolo forato e lasciateli asciugare sulla carta per fritti. Trasferite i gamberi fritti al cocco sul piatto da portata, guarniteli con sale e serviteli con la salsa alla Smarmellata."],
+                    difficulty: "Media",
+                    time: "30 min",
+                    pairing: "Vino Franciacorta Satèn",
+                    portions: "4 persone"
+                },
+                { 
+                    id: 3, 
+                    title: "Stortino", 
+                    ingredients: ["200 g di farina", "100 g di burro", "70 ml di acqua ghiacciata","300 g di Gorgonzola dolce","4 cucchiai di Smarmellata","Un sedano intero"], 
+                    instructions: ["Frullate il burro freddo con la farina per pochi minuti e mettete il tutto in una capiente ciotola e aggiungete l’acqua.", "Impastate a mano fino a che la pasta non risulti morbida. Tagliate a pezzettini piccolissimi un gambetto di sedano e mischiatelo alla pasta, formate una palla e mettete in frigo avvolta dalla pellicola per almeno 40 minuti.","Stendete la pasta sottilmente (circa 1/2 centimetro) e tagliate dei dischi poco più grandi dello stampino che userete per la cottura. Ritagliate anche un disco più piccolo che servirà per chiudere la tortina.","Rivestite lo stampino di carta forno e ricoprite con la pasta, aggiungete 3 o 4 cubetti di gorgonzola e chiudete  con il disco più piccolo.","Rimettete in frigo per circa 10 munti poi infornate a 200° per 15/20 minuti. Trascorso tale tempo togliete dal forno e spalmate uno strato leggero di Smarmellata sulla tortina, e infornate nuovamente per altri 5/10 minuti in base al vostro forno e alla cottura della brisè.","Togliete dal forno e mettete al centro del tortino caldo due cucchiaini abbondanti di Smarmellata e decorate il piatto con la stessa."],
+                    difficulty: "Difficile",
+                    time: "60 min",
+                    pairing: "Birra Imperial Stout",
+                    portions: "4 persone"
+                }
             ],
             primi: [
-                { id: 4, title: "Srisotto", ingredients: ["360 g di riso carnaroli", "6 gamberi", "⅓ di porro","2 cucchiaini di Smarmellata","Olio per friggere il porro","70 g di burro gelato","Pepe nero","Vino bianco","Un gambo di sedano","Una carota","Una cipolla","Chiodi di garofano"], instructions: ["Pulite i gamberi privandoli del carapace della coda e della testa, conservate le teste. Con uno stecchino di legno sfilate il filo intestinale, sciacquate e asciugate.", "Realizzare il brodo di pesce: infilate i chiodi di garofano nella cipolla e mettete a scaldare in abbondante acqua con il sedano, la carota e le teste dei gamberi.","Tostare il riso in un tegame insieme alla metà del porro. Sfumare con il vino bianco. Aggiungete a poco a poco il brodo di pesce filtrato.","Nel frattempo cuocere i gamberi a vapore e tagliarli a pezzetti. Friggere il porro rimasto rendendolo croccante nell’olio. Continuare a mescolare il riso e portarlo a cottura.","Togliere il tegame dal fuoco e aggiungere il burro gelato, il pepe nero macinato, due cucchiaini abbondanti di Smarmellata e mantecare.", "Impiattare il risotto e decorarlo con i gamberi, il porro croccante e la Smarmellata."], difficulty: "Media", time: "45 min", pairing: "Vino Champagne Blanc de Blancs", portions: "4 persone" },
-                { id: 5, title: "Stofu", ingredients: ["400 g di tofu compatto","3 cucchiai di salsa di soia", "2 cucchiai di sciroppo d’acero", "4 cucchiai di Smarmellata","1 cucchiaio della vostra salsa piccante preferita","Il succo di una arancia","Scorza di arancia","Semi di sesamo","3 peperoni verdi"], instructions: ["Iniziate dalla salsa: mescolate in una ciotola: la salsa di soia, la Smarmellata, lo sciroppo d’acero, il succo di arancia e la salsa piccante.", "Nel frattempo tagliate a dadi il tofu e rosolatelo in una padella con un filo d’olio fino a farlo dorare da tutti i lati. Una volta divenuto croccante e dorato, unite la salsa precedentemente preparata al tofu e lasciate cuocere in padella mescolando accuratamente","Unite i peperoni tagliati a striscioline o fettine sottilissime e fate cuocere per qualche minuto a fuoco dolce fino a raggiunere la consistenza desiderata ed impiattare guarnendo con scorza di arancia grattuggiata."], difficulty: "Facile", time: "20 min", pairing: "Vino Orange Wines", portions: "4 persone" },
-                { id: 6, title: "Scaprese", ingredients: ["2 mozzarelle di bufala", "2 cucchiai di Smarmellata", "Basilico fresco"], instructions: ["Tagliare la mozzarella di bufala in spicchi e disporre su un piatto. Con un cucchiaio porzionare la Smarmellata tra gli spicchi di mozzarella di bufala. Lavare bene le foglie di basilico, aggiungere a piacere sul piatto e guarnire con olio EVO"], difficulty: "Facile", time: "5 min", pairing: "Vino Fiano di Avellino", portions: "2 persone" }
+                { 
+                    id: 4, 
+                    title: "Srisotto", 
+                    ingredients: ["360 g di riso carnaroli", "6 gamberi", "⅓ di porro","2 cucchiaini di Smarmellata","Olio per friggere il porro","70 g di burro gelato","Pepe nero","Vino bianco","Un gambo di sedano","Una carota","Una cipolla","Chiodi di garofano"], 
+                    instructions: ["Pulite i gamberi privandoli del carapace della coda e della testa, conservate le teste. Con uno stecchino di legno sfilate il filo intestinale, sciacquate e asciugate.", "Realizzare il brodo di pesce: infilate i chiodi di garofano nella cipolla e mettete a scaldare in abbondante acqua con il sedano, la carota e le teste dei gamberi.","Tostare il riso in un tegame insieme alla metà del porro. Sfumare con il vino bianco. Aggiungete a poco a poco il brodo di pesce filtrato.","Nel frattempo cuocere i gamberi a vapore e tagliarli a pezzetti. Friggere il porro rimasto rendendolo croccante nell’olio. Continuare a mescolare il riso e portarlo a cottura.","Togliere il tegame dal fuoco e aggiungere il burro gelato, il pepe nero macinato, due cucchiaini abbondanti di Smarmellata e mantecare.", "Impiattare il risotto e decorarlo con i gamberi, il porro croccante e la Smarmellata."],
+                    difficulty: "Media",
+                    time: "45 min",
+                    pairing: "Vino Champagne Blanc de Blancs",
+                    portions: "4 persone"
+                },
+                { 
+                    id: 5, 
+                    title: "Stofu", 
+                    ingredients: ["400 g di tofu compatto","3 cucchiai di salsa di soia", "2 cucchiai di sciroppo d’acero", "4 cucchiai di Smarmellata","1 cucchiaio della vostra salsa piccante preferita","Il succo di una arancia","Scorza di arancia","Semi di sesamo","3 peperoni verdi"], 
+                    instructions: ["Iniziate dalla salsa: mescolate in una ciotola: la salsa di soia, la Smarmellata, lo sciroppo d’acero, il succo di arancia e la salsa piccante.", "Nel frattempo tagliate a dadi il tofu e rosolatelo in una padella con un filo d’olio fino a farlo dorare da tutti i lati. Una volta divenuto croccante e dorato, unite la salsa precedentemente preparata al tofu e lasciate cuocere in padella mescolando accuratamente","Unite i peperoni tagliati a striscioline o fettine sottilissime e fate cuocere per qualche minuto a fuoco dolce fino a raggiunere la consistenza desiderata ed impiattare guarnendo con scorza di arancia grattuggiata."],
+                    difficulty: "Facile",
+                    time: "20 min",
+                    pairing: "Vino Orange Wines",
+                    portions: "4 persone"
+                },
+                { 
+                    id: 6, 
+                    title: "Scaprese", 
+                    ingredients: ["2 mozzarelle di bufala", "2 cucchiai di Smarmellata", "Basilico fresco"], 
+                    instructions: ["Tagliare la mozzarella di bufala in spicchi e disporre su un piatto. Con un cucchiaio porzionare la Smarmellata tra gli spicchi di mozzarella di bufala. Lavare bene le foglie di basilico, aggiungere a piacere sul piatto e guarnire con olio EVO"],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "Vino Fiano di Avellino",
+                    portions: "2 persone"
+                }
             ],
             secondi: [
-                { id: 7, title: "Sanatra", ingredients: ["Petto d’anatra (2 da 800 g)", "Bacche di ginepro", "Rosmarino","Olio EVO","60 g di Smarmellata","600 g di patate novelle","Aglio","Sale"], instructions: ["Eliminate le piccole piume rimaste attaccate alla pelle dei petti d'anatra con una pinzetta da cucina. Incidete i petti dalla parte della pelle praticando 3 tagli in diagonale e 4 trasversali per creare dei rombi.","Ponete i petti dalla parte incisa in una padella antiaderente ben calda e lasciate cuocere 3 minuti in modo che si crei una crosticina dorata; poi girateli e lasciateli dorare anche sull’altro lato per altri 3 minuti.","Mettete la Smarmellata in una ciotolina e poi spennellate la pelle dei petti, coprendoli in maniera uniforme. Versate circa un quarto di bicchiere d’acqua sul fondo della teglia. Coprite con un foglio di alluminio e cuocete a 160° per 30-40 minuti."], difficulty: "Difficile", time: "90 min", pairing: "Vino Pinot Nero o Vino Gewürztraminer", portions: "4 persone" },
-                { id: 8, title: "Ssalmone", ingredients: ["2 porzioni di salmone norvegese da 150 g", "2 cucchiai di Smarmellata", "Olio EVO","Succo di una arancia","2 cucchiai di salsa di soia","2 cucchiai di zucchero di canna","Paprika","Pepe nero"], instructions: ["In un recipiente creare una marinatura con l’olio extravergine d’oliva, lo zucchero di canna, la salsa di soia, il succo di arancia. Marinare per 10 min.","Sistemarle su una teglia con la pelle rivolta verso il basso. Infornare a 180° per 8/10 minuti.","Spennellare il salmone con una glassa di Smarmellata ed acqua. Infornare nuovamente per altri 2/3 minuti."], difficulty: "Facile", time: "50 min", pairing: "Vino Riesling", portions: "2 persone" },
-                { id: 9, title: "Scostine", ingredients: ["2 Kg di costine di maiale singole", "200 g di Smarmellata", "2 bicchieri di salsa di soia","Sale","Pepe nero","Vino bianco","Aglio","Salsa piccante"], instructions: ["Rosolare le costine in padella. Sciacquare con acqua bollente per eliminare il grasso.","Disporre le costine in un tegame con acqua, vino, soia, Smarmellata e aglio.","Stufare per 30-40 minuti fino ad addensare il sugo."], difficulty: "Media", time: "90 min", pairing: "Vino Primitivo di Manduria", portions: "4 persone" }
+                { 
+                    id: 7, 
+                    title: "Sanatra", 
+                    ingredients: ["Petto d’anatra (2 da 800 g)", "Bacche di ginepro", "Rosmarino","Olio EVO","60 g di Smarmellata","600 g di patate novelle","Aglio","Sale"], 
+                    instructions: ["Eliminate le piccole piume rimaste attaccate alla pelle dei petti d'anatra con una pinzetta da cucina. Incidete i petti dalla parte della pelle praticando 3 tagli in diagonale e 4 trasversali per creare dei rombi.","Ponete i petti dalla parte incisa in una padella antiaderente ben calda e lasciate cuocere 3 minuti in modo che si crei una crosticina dorata; poi girateli e lasciateli dorare anche sull’altro lato per altri 3 minuti: l’anatra si cuocerà con il suo stesso grasso rilasciato in cottura. Quando i petti saranno pronti, adagiateli con la pelle rivolta verso l’alto in una teglia, che potete foderare con carta da forno. Versate il liquido formatosi in cottura e regolate di sale.", "Mettete la Smarmellata in una ciotolina e poi spennellate la pelle dei petti, coprendoli in maniera uniforme. Con il dorso di un coltello schiacciate le bacche di ginepro, facendo pressione con le mani; condite i petti con le bacche, le foglioline di rosmarino, l’olio e infine versate circa un quarto di bicchiere d’acqua sul fondo della teglia. Coprite con un foglio di alluminio e cuocete in forno statico preriscaldato a 160° per 30-40 minuti (o a 130° per 20-30 minuti se in forno ventilato).","Una volta messo in forno i petti: lavate le patate novelle sotto abbondante acqua fresca corrente. Con un coltello o una mandolina tagliatele a rondelle dello spesso di 2-3 mm senza togliere la buccia, ponendole man mano che le tagliate in un recipiente con dell’acqua per non farle annerire. Una volta terminato, fate rosolare uno spicchio d’aglio sbucciato con un filo di olio in una pentola antiaderente, quindi scolate le patate e asciugatele con un canovaccio pulito. Quando l'aglio avrà preso colore, ponete le patate tagliate a rondelle sul fuoco e cuocete a fuoco medio per 15 minuti, mescolando con un cucchiaio di legno. Aggiungete qualche fogliolina di rosmarino per insaporire e regolate di sale.","Dopo 30-35 minuti, controllate la cottura della carne, tagliando il cuore del petto con un coltello o verificando con una sonda: in questo caso, la temperatura dovrà essere di 71°; se dovesse risultare inferiore, lasciate l’anatra in forno e ricontrollate dopo 5-10 minuti. Una volta pronta, sfornate e impiattate: servite il vostro petto d’anatra laccato alla Smarmellata, accompagnandolo con le patate novelle e qualche fettina o spicchio di arancia."],
+                    difficulty: "Difficile",
+                    time: "90 min",
+                    pairing: "Vino Pinot Nero o Vino Gewürztraminer",
+                    portions: "4 persone"
+                },
+                { 
+                    id: 8, 
+                    title: "Ssalmone", 
+                    ingredients: ["2 porzioni di salmone norvegese da 150 g", "2 cucchiai di Smarmellata", "Olio EVO","Succo di una arancia","2 cucchiai di salsa di soia","2 cucchiai di zucchero di canna","Paprika","Pepe nero"], 
+                    instructions: ["In un recipiente creare una marinatura con l’olio extravergine d’oliva, lo zucchero di canna, la salsa di soia, il succo di arancia, un pizzico di paprika e pepe nero, diluire con acqua se dovesse risultare troppo densa e lasciarvi marinare per 8/10 minuti le porzioni di salmone.", "Sistemarle su una teglia rivestita da carta forno con la pelle rivolta verso il basso e distribuirvi sopra la marinatura rimasta. Infornare a 180° per 8/10 minuti.","Togliere la teglia dal forno e spennellare il salmone con una glassa di Smarmellata ed acqua. Infornare nuovamente per altri 2/3 minuti. Infine sfornare e impiattare decorando con due o tre fettine di arancia e accompagnate con verdure croccanti (asparagi o finocchi)."],
+                    difficulty: "Facile",
+                    time: "50 min",
+                    pairing: "Vino Riesling",
+                    portions: "2 persone"
+                },
+                { 
+                    id: 9, 
+                    title: "Scostine", 
+                    ingredients: ["2 Kg di costine di maiale singole", "200 g di Smarmellata", "2 bicchieri di salsa di soia","Sale","Pepe nero","Vino bianco","Aglio","Salsa piccante (facoltativa)"], 
+                    instructions: ["In una padella disporre le costine e rosolare superficialmente a fuoco alto per tutti i lati.","Quando le costine sono rosolate, prenderle dalla padella e sciacquare con acqua bollente per eliminare il grasso superficiale. Asciugare bene con carta da cucina.", "Disporre le costine in un tegame poi aggiungere l’acqua, mezzo bicchiere di vino bianco, la salsa di soia, la Smarmellata, uno spicchio d’aglio e cuocere a fuoco medio.","Raggiunto il bollore, abbassare il fuoco, togliere la schiuma con una schiumarola. Se si gradisce “spicy” aggiungere la salsa piccante. Continuare a stufare per 30-40 minuti. Girare le costine, poi alzare la fiamma e cuocere ancora per 10-15 minuti senza coperchio per addensare il sugoo.","Lasciare riposare per una mezz’oretta con coperchio prima di servire."],
+                    difficulty: "Media",
+                    time: "90 min",
+                    pairing: "Vino Primitivo di Manduria",
+                    portions: "4 persone"
+                }
             ],
             dolci: [
-                { id: 13, title: "Scrostata", ingredients: ["150 g di mascarpone", "Smarmellata!", "2 Uova","80 g di zucchero","200 g di farina 00","100 g di burro"], instructions: ["Preparare la frolla e lasciarla raffreddare in frigo 30 min.","Mescolare mascarpone, uova e zucchero.","Versare la crema sulla base, aggiungere Smarmellata e infornare a 180° per 30 minuti."], difficulty: "Difficile", time: "90 min", pairing: "Vin Santo del Chianti", portions: "8 persone" },
-                { id: 14, title: "Smarmellamisu", ingredients: ["3/4 biscotti alla farina di segale", "125 g di Yogurt al caffè", "20 g di Smarmellata","1 tazzina di caffè"], instructions: ["Inzuppare i biscotti nel caffè.","Alternare strati di biscotti e yogurt, finire con Smarmellata.","Lasciar riposare in frigo una notte."], difficulty: "Facile", time: "15 min", pairing: "Passito di pantelleria o Birra Coffee Stout", portions: "Per porzione" },
-                { id: 15, title: "Sricotta", ingredients: ["2 fette di ricotta", "Smarmellata", "Pistacchi"], instructions: ["Piastrare la ricotta calda da entrambi i lati.","Mettere Smarmellata sopra e far raffreddare in frigo 1 ora.","Decorare con pistacchi."], difficulty: "Facile", time: "5 min", pairing: "Vino Sauvignon Blanc", portions: "2 persone" }
+                { 
+                    id: 13, 
+                    title: "Scrostata", 
+                    ingredients: ["150 g di mascarpone", "Smarmellata!", "2 Uova","80 g di zucchero","2 cucchiai di zucchero di canna","200 g di farina 00","100 g di burro","Una arancia"], 
+                    instructions: ["Preparare la pasta frolla con il metodo classico: ammorbidire il burro a temperatura ambiente (dovrà risultare morbido ma ancora plastico). Tagliate il burro a cubetti e versarlo in una ciotola. Aggiungere lo zucchero e lavorare il composto con le mani o con una frusta sino ad ottenere una crema. Unire poi un uovo. Mescolare bene (non preoccupatevi se il composto non risulterà troppo omogeneo). Versare la farina tutta in una volta e impastare con le mani, tassativamente fredde. Non appena la farina sarà stata assorbita, trasferire il composto su un piano e impastare molto velocemente sino a che non risulterà omogeneo. Fare una palla, avvolgerla nella pellicola e lasciarla raffreddare in frigorifero per 30 minuti.", "Nell’attesa: sbattere leggermente un uovo con la forchetta, aggiungere il mascarpone e lo zucchero di canna, lavorare il tutto per amalgamare gli ingredienti.", "Preriscaldare il forno a 180°.","Trascorsi i 30 minuti: prendi l’impasto e stendilo, tenere da parte un po’ di frolla che servirà per le striscioline della griglia di copertura (opzionale). Sistemare la frolla in uno stampo da 20 cm e bucarla con la forchetta.","Versa la crema sulla base di frolla, aggiungiere la Smarmellata in superficie e coprire con delle striscioline di pasta frolla (opzionale).","Infornare la crostata a 180° per 30 minuti. Una volta cotta, lasciarla riposare altri 30 minuti prima di servirla e decorate con fette di arancia fresca."],
+                    difficulty: "Difficile",
+                    time: "90 min",
+                    pairing: "Vin Santo del Chianti",
+                    portions: "8 persone"
+                },
+                { 
+                    id: 14, 
+                    title: "Smarmellamisu", 
+                    ingredients: ["3/4 biscotti alla farina di segale", "125 g di Yogurt al caffè", "20 g di Smarmellata","1 tazzina di caffè","Cannella","Lamelle di mandorle tostate"], 
+                    instructions: ["Inzuppare i biscotti in una ciotola dove avrete precedentemente miscelato il caffè alla cannella. Alternare in un vasetto o in un bicchiere, strati di biscotti inzuppati e yogurt al caffè e completare con uno strato di Smarmellata.", "Lasciar riposare in frigorifero per una notte.","Servire completando con lamelle di mandorle."],
+                    difficulty: "Facile",
+                    time: "15 min",
+                    pairing: "Passito di pantelleria o Birra Coffee Stout",
+                    portions: "Per porzione"
+                },
+                { 
+                    id: 15, 
+                    title: "Sricotta", 
+                    ingredients: ["2 fette di ricotta vaccina o di pecora", "Smarmellata", "Pistacchi sgusciati"], 
+                    instructions: ["Tagliare due fette di ricotta di circa 1 cm e metterle per qualche minuto sulla piastra oppure in una padella ben calda. Far dorare da entrambi i lati. Mettere uno o due cucchiaini di Smarmellata sopra la fetta. Togliere dal fuoco, far raffreddare e mettere in frigorifero per almeno 1 ora.", "Decorare con pistacchi sbriciolati prima di servire."],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "Vino Sauvignon Blanc",
+                    portions: "2 persone"
+                }
             ],
             drinks: [
-                { id: 10, title: "Scoffee", ingredients: ["Miscela per caffè americano", "Cannella", "Smarmellata"], instructions: ["Aggiungere cannella al caffè e Smarmellata nella caffettiera vuota.","Estrarre il caffè e mescolare."], difficulty: "Facile", time: "5 min", pairing: "Cioccolato fondente", portions: "4 persone" },
-                { id: 11, title: "Smargarita", ingredients: ["Tequila", "Triple sec", "Smarmellata", "Succo pompelmo"], instructions: ["Shakerare tutti gli ingredienti con ghiaccio.","Filtrare nel bicchiere con bordo di sale."], difficulty: "Facile", time: "5 min", pairing: "-", portions: "1 persona" },
-                { id: 12, title: "Lady Smarmalade", ingredients: ["Gin", "Bitter", "Acqua tonica", "Smarmellata"], instructions: ["Mescolare Smarmellata, Gin e Bitter nel bicchiere con ghiaccio.","Colmare con tonica."], difficulty: "Facile", time: "5 min", pairing: "-", portions: "1 persona" }
+                { 
+                    id: 10, 
+                    title: "Scoffee", 
+                    ingredients: ["Miscela per caffè americano", "Un cucchiaio di Cannella", "4 chiodi di garofano","60 g di Smarmellata","1 cucchiaio di zucchero di canna"], 
+                    instructions: ["Prima di accendere la macchinetta per il caffè americano: Aggiungere alla miscela di caffè la cannella e i chiodi di garofano. Nella caffettiera vuota aggiungere la Smarmellata e lo zucchero.", "Accendere la macchinetta e aspettare che il procedimento di estrazione si concluda.","Prima di servire, mescolare velocemente il caffè aromatizzato, versarne 3/4 di tazza e guarnire a piacere con panna montata e scorza di arancia grattugiata."],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "Cioccolato extra fondente",
+                    portions: "4 persone"
+                },
+                { 
+                    id: 11, 
+                    title: "Smargarita", 
+                    ingredients: ["50 ml di Tequila", "10 ml di Triple sec", "5 ml di sciroppo di miele", "15 ml di succo di limone", "25 ml di succo di pompelmo", "10 g di Smarmellata", "Scorza di pompelmo", "Sale"], 
+                    instructions: ["Raffreddare il bicchiere di presentazione con abbondante ghiaccio.", "In uno shaker aggiungere: la Smarmellata, la Tequila, il Triple sec, lo sciroppo al miele. il succo di limone, il succo di pompelmo e ghiaccio.", "Shakerare energicamente.", "Guarnire il bordo del bicchiere raffreddato con sale.", "Filtrare il composto shakerato nel bicchiere e decorare con la scorza di pompelmo."],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "-",
+                    portions: "1 persona"
+                },
+                { 
+                    id: 12, 
+                    title: "Lady Smarmalade", 
+                    ingredients: ["50 ml di Gin", "15 ml di Bitter", "200 ml acqua tonica", "Un cucchiaio di Smarmellata", "Scorza di arancia"], 
+                    instructions: ["Raffreddare il bicchiere di presentazione con abbondante ghiaccio.", "Mescolare Smarmellata, Gin e Bitter direttamente nel bicchiere raffreddato. Aggiungere ghiaccio e colmare con l’acqua tonica.", "Guarnire con un twist di scorza di arancia."],
+                    difficulty: "Facile",
+                    time: "5 min",
+                    pairing: "-",
+                    portions: "1 persona"
+                }
             ]
         };
 
@@ -1490,6 +1757,7 @@
 
                 list.forEach((card, idx) => {
                     const img = getImagePath(cat, idx);
+                    // Desktop
                     const dCard = document.createElement('div');
                     dCard.className = 'desktop-card';
                     dCard.style.animationDelay = `${idx * 0.15}s`;
@@ -1497,17 +1765,20 @@
                     dCard.onclick = () => openRecipeModal(cat, idx);
                     desktopCards.appendChild(dCard);
 
+                    // Mobile
                     const mCard = document.createElement('div');
                     mCard.className = `mobile-card ${idx===0?'active entrance-anim':(idx===1?'next':'previous')}`;
                     mCard.innerHTML = `<div class="card-image"><img src="${img}" onerror="this.src='https://via.placeholder.com/400x600/222/fff?text=${card.title}'"></div><div class="card-content"><h3 class="card-title">${card.title}</h3></div>`;
                     mCard.onclick = () => openRecipeModal(cat, idx);
                     mobileCardsContainer.appendChild(mCard);
 
+                    // Dot
                     const dot = document.createElement('div');
                     dot.className = `card-dot ${idx===0?'active':''}`;
                     dot.onclick = () => updateMobileView(idx);
                     cardsDots.appendChild(dot);
                 });
+                
                 bindMobileEvents();
             }
 
@@ -1517,6 +1788,7 @@
                     if (newIndex < 0) newIndex = totalCards - 1; 
                     updateMobileView(newIndex);
                 };
+                
                 document.getElementById('mobileNextButton').onclick = () => {
                     let newIndex = currentMobileCardIndex + 1;
                     if (newIndex >= totalCards) newIndex = 0; 
@@ -1543,6 +1815,7 @@
                     generateCards(currentCategory);
                 }
             });
+
             generateCards(currentCategory);
         }
 
@@ -1551,24 +1824,34 @@
             const modal = document.getElementById('recipeModal');
             document.getElementById('modalTitle').textContent = data.title;
             document.getElementById('modalImage').src = getImagePath(cat, idx);
-            document.getElementById('modalDifficulty').textContent = data.difficulty;
-            document.getElementById('modalTime').textContent = data.time;
-            document.getElementById('modalPortions').textContent = data.portions;
-            document.getElementById('modalPairing').textContent = data.pairing;
+            document.getElementById('modalImage').onerror = function(){this.src=`https://via.placeholder.com/800x400/222/fff?text=${data.title}`};
+            
+            // Popola i nuovi campi
+            document.getElementById('modalDifficulty').textContent = data.difficulty || 'N/A';
+            document.getElementById('modalTime').textContent = data.time || 'N/A';
+            document.getElementById('modalPortions').textContent = data.portions || 'N/A';
+            document.getElementById('modalPairing').textContent = data.pairing || 'N/A';
 
             const ingList = document.getElementById('modalIngredients');
             ingList.innerHTML = '';
             data.ingredients.forEach(ing => {
                 const li = document.createElement('li'); li.textContent = ing; ingList.appendChild(li);
             });
+            
             const insList = document.getElementById('modalInstructions');
             insList.innerHTML = '';
             data.instructions.forEach(ins => {
-                const p = document.createElement('p'); p.textContent = ins; insList.appendChild(p);
+                const p = document.createElement('p'); // Changed to p
+                p.textContent = ins;
+                insList.appendChild(p);
             });
+            
+            // Add Enjoy!
             const enjoyDiv = document.createElement('div');
-            enjoyDiv.className = 'recipe-enjoy'; enjoyDiv.textContent = 'Enjoy!';
+            enjoyDiv.className = 'recipe-enjoy';
+            enjoyDiv.textContent = 'Enjoy!';
             insList.appendChild(enjoyDiv);
+            
             modal.classList.add('active');
         }
 
@@ -1576,24 +1859,26 @@
 
         // ==================== NAVIGAZIONE E INIZIALIZZAZIONE ====================
         document.addEventListener('DOMContentLoaded', function() {
-            // FORZIAMO L'INIZIALIZZAZIONE IMMEDIATA PER IL LOADER
-            initMainModel();
-            initOrangesScene();
-            initCardsSystem();
-
             const sections = document.querySelectorAll('.fullscreen-section');
             const navDots = document.querySelectorAll('.nav-dot');
             const mainContainer = document.getElementById('mainContainer');
             const scrollProgress = document.getElementById('scrollProgress');
 
+            initCardsSystem();
+
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
                         const id = entry.target.id;
+                        
                         const num = id.replace('section', '');
                         navDots.forEach(d => d.classList.toggle('active', d.dataset.section === num));
+                        
                         const content = entry.target.querySelector('.section-content');
                         if(content) content.classList.add('visible');
+                        
+                        if(id === 'section1') setTimeout(initMainModel, 100);
+                        if(id === 'section3') setTimeout(initOrangesScene, 100);
                     }
                 });
             }, { threshold: 0.5 });
@@ -1607,7 +1892,9 @@
             });
 
             navDots.forEach(dot => {
-                dot.onclick = function() { scrollToSection(this.dataset.section); }
+                dot.onclick = function() {
+                    scrollToSection(this.dataset.section);
+                }
             });
         });
 
